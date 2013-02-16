@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.ifihada.hextilewallpaper"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="7"
+        android:targetSdkVersion="16" />
+    <uses-feature android:required="true" android:name="android.software.live_wallpaper"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+        <service android:label="Hextile Wallpaper" android:name="HextileService" android:permission="android.permission.BIND_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService"/>
+            </intent-filter>
+            <meta-data android:name="android.service.wallpaper" android:resource="@xml/wallpaper" />
+        </service>
+    </application>
+
+</manifest>
