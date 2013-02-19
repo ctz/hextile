@@ -1,27 +1,21 @@
 package com.ifihada.hextilewallpaper;
 
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.NoSuchElementException;
-
-import android.graphics.Canvas;
-import android.graphics.ComposeShader;
-import android.graphics.LinearGradient;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.PorterDuff;
-import android.graphics.Shader;
-import android.graphics.Paint.Style;
-
+import javax.microedition.khronos.opengles.GL10;
 
 class Tiles
 {
   static final String TAG = "Tiles";
-  HexGeom geom = new HexGeom(75f);
+  HexGeom geom = new HexGeom(50f);
   int width, height;
+  boolean dirty;
 
+  final float pad = 5f;
+  final float padh = pad * Const.sin60;
+
+  int[][] colours;
+  
   Tiles()
   {
     this(0, 0);
@@ -30,6 +24,7 @@ class Tiles
   Tiles(int w, int h)
   {
     this.resize(w, h);
+    this.dirty = true;
   }
 
   void resize(int w, int h)
@@ -37,24 +32,69 @@ class Tiles
     this.width = w;
     this.height = h;
     this.onResize();
+    this.dirty = true;
   }
-
-  static final int MAX_STATES = 6;
-  final int[][] colours = new int[][]
+  
+  void onResize()
   {
-      // base
-      { 0xff333344, 0xff222233 },
+    int xmax = 0, ymax = 0;
+    
+    for (TilePosition t : this.eachTile())
+    {
+      if (t.ix > xmax)
+        xmax = t.ix;
+      if (t.iy > ymax)
+        ymax = t.iy;
+    }
+    
+    int[][] newcolours = new int[xmax + 1][ymax + 1];
+    
+    for (int[] column : newcolours)
+    {
+      for (int i = 0; i < column.length; i++)
+      {
+        column[i] = BASE_COLOUR;
+      }
+    }
+    
+    if (this.colours != null)
+    {
+      for (int x = 0; x < this.colours.length; x++)
+      {
+        for (int y = 0; y < this.colours[x].length; y++)
+        {
+          if (x < xmax && y < ymax)
+            newcolours[x][y] = this.colours[x][y];
+        }
+      }
+    }
+    
+    this.colours = newcolours;
+  }
+  
+  final static int BASE_COLOUR = 0x333344ff;
+  final static int[] COLOURS = new int[]
+  {
+   0x33b5e5ff,
+   0xaa66ccff,
+   0x99cc00ff,
+   0xffbb33ff,
+   0xff4444ff,
+  };
 
-      { 0xff33b5e5, 0xff0099cc },
-      { 0xffaa66cc, 0xff9933cc },
-      { 0xff99cc00, 0xff669900 },
-      { 0xffffbb33, 0xffff8800 },
-      { 0xffff4444, 0xffcc0000 } };
-
-  Shader[] baseColour = new Shader[MAX_STATES];
-  Shader topLighting;
-  Matrix mp = new Matrix();
-  Paint[] paint = new Paint[MAX_STATES];
+  /*
+  final int[][] fixedcolours = new int[][]
+  {
+    // base
+    { 0x333344ff, 0x222233ff },
+  
+    { 0x33b5e5ff, 0x0099ccff },
+    { 0xaa66ccff, 0x9933ccff },
+    { 0x99cc00ff, 0x669900ff },
+    { 0xffbb33ff, 0xff8800ff },
+    { 0xff4444ff, 0xcc0000ff }
+  };
+  */
 
   Iterable<TilePosition> eachTile()
   {
@@ -97,11 +137,13 @@ class Tiles
             
             if (this.first)
             {
-              this.p.i.x = 0;
-              this.p.i.y = 0;
+              this.p.ix = 0;
+              this.p.iy = 0;
               this.p.x = this.lx;
               this.p.y = this.ly;
               this.p.oddRow = false;
+              this.p.colour = getColour(0, 0);
+              this.p.updateAdjacent();
               this.first = false;
               return this.p;
             }
@@ -112,7 +154,7 @@ class Tiles
           
           private void step()
           {
-            this.p.i.x += 1;
+            this.p.ix += 1;
             this.p.x += this.sx;
             
             if (this.p.oddRow)
@@ -124,12 +166,15 @@ class Tiles
             
             if (this.p.x > this.hx)
             {
-              this.p.i.x = 0;
-              this.p.i.y += 1;
+              this.p.ix = 0;
+              this.p.iy += 1;
               this.p.x = this.lx;
               this.p.y += this.sy;
               this.p.oddRow = !this.p.oddRow;
             }
+
+            this.p.updateAdjacent();
+            this.p.colour = getColour(this.p.ix, this.p.iy);
           }
 
           @Override
@@ -141,109 +186,129 @@ class Tiles
       }
     };
   }
-
-  void onResize()
-  {
-    this.topLighting = new LinearGradient(0, -this.geom.h, 0, this.geom.h,
-        0x3fffffff, 0x2f000000, Shader.TileMode.CLAMP);
-
-    for (int i = 0; i < MAX_STATES; i++)
-    {
-      this.baseColour[i] = new LinearGradient(0, 0, 0, this.height,
-          colours[i][0], colours[i][1], Shader.TileMode.CLAMP);
-      Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
-      p.setColor(0xff336699);
-      p.setStyle(Style.FILL);
-      p.setShader(new ComposeShader(this.baseColour[i], this.topLighting,
-          PorterDuff.Mode.SRC_ATOP));
-      this.paint[i] = p;
-    }
-  }
-
-  Map<Point, Integer> stateMap = new HashMap<Point, Integer>();
   
-  void spread(int x, int y)
+  int getColour(int x, int y)
   {
-    if (x < 0 || y < 0)
-      return;
-    
-    Point p = new Point(x, y);
-    Integer st = this.stateMap.get(p);
-    if (st != null)
-      return;
-    this.stateMap.put(p, 3);
-  }
-  
-  void stepCell(Point loc)
-  {
-    Integer state = this.stateMap.get(loc);
-    int istate;
-    if (state == null)
-      return;
-    
-    istate = state;
-    
-    istate += 1;
-    istate %= MAX_STATES;
-    
-    if (istate == 0)
-    {
-      this.stateMap.remove(loc);
-    } else {
-      this.stateMap.put(new Point(loc), istate);
-    }
-  }
-
-  Paint paintForCell(float x, float y, Point loc)
-  {
-    Integer state = this.stateMap.get(loc);
-    int istate;
-    if (state == null)
-      istate = 0;
+    if (this.colours == null ||
+        x >= this.colours.length ||
+        y >= this.colours[x].length)
+      return 0x00000000;
     else
-      istate = state;
-
-    this.mp.setTranslate(-x, -y);
-    this.baseColour[istate].setLocalMatrix(this.mp);
-    return this.paint[istate];
+      return this.colours[x][y];
   }
-
-  float pad = 3f;
-  float padh = pad * Const.sin60;
-
-  void render(Canvas canvas)
+  
+  int merge(int target, int x, int y, int density)
   {
-    for (TilePosition t : this.eachTile())
+    if (x < 0 || x >= this.colours.length)
+      return target;
+    if (y < 0 || y >= this.colours[x].length)
+      return target;
+    int source = this.colours[x][y];
+    if (source == Tiles.BASE_COLOUR)
+      return target;
+    else
+      return Colour.rgbaLerp(target, source, density);
+  }
+  
+  void propagate(int sx, int sy, int tx, int ty)
+  {
+    if (sx < 0 || sx >= this.colours.length ||
+        tx < 0 || tx >= this.colours.length)
+      return;
+    if (sy < 0 || sy >= this.colours[sx].length ||
+        ty < 0 || ty >= this.colours[tx].length)
+      return;
+    
+    int source = this.colours[sx][sy];
+    if (source != Tiles.BASE_COLOUR)
+      this.colours[tx][ty] = Colour.rgbaLerp(this.colours[tx][ty], this.colours[sx][sy], 1);
+  }
+  
+  void spread(TilePosition t)
+  {
+    propagate(t.ix, t.iy, t.a1x, t.a1y);
+    propagate(t.ix, t.iy, t.a2x, t.a2y);
+    propagate(t.ix, t.iy, t.a3x, t.a3y);
+    propagate(t.ix, t.iy, t.a4x, t.a4y);
+  }
+  
+  boolean stepCell(TilePosition t)
+  {
+    int target = this.colours[t.ix][t.iy];
+    int original = target;
+    
+    /*
+    target = merge(target, t.a1x, t.a1y, adjDensity);
+    target = merge(target, t.a2x, t.a2y, adjDensity);
+    target = merge(target, t.a3x, t.a3y, adjDensity);
+    target = merge(target, t.a4x, t.a4y, adjDensity);
+    */
+    
+    target = Colour.rgbaLerp(target, Tiles.BASE_COLOUR, 1);
+    if (original != target)
     {
-      Paint paint = this.paintForCell(t.cx, t.y, t.i);
-      this.geom.draw(canvas, t.cx, t.y, paint);
+      this.colours[t.ix][t.iy] = target;
+      spread(t);
+      return true;
+    } else {
+      return false;
     }
   }
   
-  void step()
+  void render(GL10 gl)
   {
     for (TilePosition t : this.eachTile())
     {
-      this.stepCell(t.i);
+      this.geom.draw(gl, t);
     }
   }
+  
+  boolean step()
+  {
+    boolean changed = false;
+    
+    if (!this.dirty)
+      return false;
+    
+    for (TilePosition t : this.eachTile())
+    {
+      if (this.stepCell(t))
+        changed = true;
+    }
+    
+    if (changed)
+      this.dirty = true;
+    else
+      this.dirty = false;
+    
+    return changed;
+  }
 
-  boolean handleTouch(float touchx, float touchy)
+  boolean handleTouch(float touchx, float touchy, boolean firstInBatch)
   {
     for (TilePosition t : this.eachTile())
     {
       if (this.geom.within(t.cx, t.y, touchx, touchy))
       {
-        return this.pointTouched(t.i);
+        this.pointTouched(t.ix, t.iy, firstInBatch);
+        this.dirty = true;
+        return true;
       }
     }
     
     return false;
   }
+  
+  private int selectedColour = 0;
 
-  private boolean pointTouched(Point p)
+  private boolean pointTouched(int x, int y, boolean firstInBatch)
   {
-    this.stateMap.put(new Point(p), 1);
+    if (firstInBatch)
+    {
+      this.selectedColour = (this.selectedColour + 1) % COLOURS.length;
+    }
+    
+    this.colours[x][y] = COLOURS[this.selectedColour];
     return true;
   }
 }

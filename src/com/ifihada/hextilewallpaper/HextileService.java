@@ -1,11 +1,8 @@
 package com.ifihada.hextilewallpaper;
 
-import net.rbgrn.android.glwallpaperservice.GLWallpaperService;
-
-import android.graphics.Canvas;
-import android.os.Handler;
+import android.os.AsyncTask;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
+import net.rbgrn.android.glwallpaperservice.GLWallpaperService;
 
 public class HextileService extends GLWallpaperService
 {
@@ -15,86 +12,89 @@ public class HextileService extends GLWallpaperService
     return new HextileEngine();
   }
 
-  class HextileEngine extends Engine
+  class HextileEngine extends GLEngine
   {
-    private Handler handler = new Handler();
-    private final Runnable drawRunner = new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        draw(true);
-      }
-    };
-
-    boolean visible = true;
-
+    HextileRenderer renderer;
+    
     public HextileEngine()
     {
-      this.handler.post(this.drawRunner);
+      super();
+
+      this.renderer = new HextileRenderer(this);
+      this.setRenderer(this.renderer);
+      this.setRenderMode(RENDERMODE_WHEN_DIRTY);
+      this.setTouchEventsEnabled(true);
+      this.start();
     }
     
-    @Override
-    public void onSurfaceDestroyed(SurfaceHolder holder)
-    {
-      super.onSurfaceDestroyed(holder);
-      this.onVisibilityChanged(false);
-    }
-
-    @Override
-    public void onSurfaceChanged(SurfaceHolder holder, int format, int width,
-        int height)
-    {
-      this.tiles.resize(width, height);
-      super.onSurfaceChanged(holder, format, width, height);
-    }
-
-    @Override
-    public void onVisibilityChanged(boolean visible)
-    {
-      this.visible = visible;
-
-      if (this.visible)
-        this.handler.post(this.drawRunner);
-      else
-        this.handler.removeCallbacks(this.drawRunner);
-    }
-
+    boolean inBatch = false;
+    boolean isVisible = true;
+    RenderTask renderTask = null;
+    
     @Override
     public void onTouchEvent(MotionEvent ev)
     {
-      if (ev.getAction() == MotionEvent.ACTION_UP)
-        return;
-      boolean scheduleDraw = false;
       for (int p = 0; p < ev.getPointerCount(); p++)
-        scheduleDraw = this.tiles.handleTouch(ev.getX(p), ev.getY(p)) || scheduleDraw;
-      if (scheduleDraw)
-        this.draw(false);
-    }
-
-    private void draw(boolean periodic)
-    {
-      SurfaceHolder holder = getSurfaceHolder();
-      Canvas canvas = null;
-
-      try
       {
-        canvas = holder.lockCanvas();
-        canvas.drawRGB(0, 0, 0);
-        if (periodic)
-          this.tiles.step();
-        this.tiles.render(canvas);
-      } finally
-      {
-        if (canvas != null)
-          holder.unlockCanvasAndPost(canvas);
+        this.renderer.tiles.handleTouch(ev.getX(p), ev.getY(p), !inBatch);
+        inBatch = true;
       }
-
-      this.handler.removeCallbacks(this.drawRunner);
-      if (this.visible)
-        this.handler.postDelayed(this.drawRunner, 500);
+      
+      if (ev.getAction() == MotionEvent.ACTION_UP)
+      {
+        this.inBatch = false;
+      }
     }
+    
+    @Override
+    public void onVisibilityChanged(boolean visible)
+    {
+      super.onVisibilityChanged(visible);
+      this.isVisible = visible;
+      
+      if (this.isVisible)
+        this.start();
+      else
+        this.pause();
+    }
+    
+    private synchronized void start()
+    {
+      if (this.renderTask == null)
+      {
+        this.renderTask = new RenderTask();
+        this.renderTask.execute();
+      }
+    }
+    
+    private synchronized void pause()
+    {
+      if (this.renderTask != null)
+      {
+        this.renderTask.cancel(false);
+        this.renderTask = null;
+      }
+    }
+    
+    class RenderTask extends AsyncTask<Void, Void, Void>
+    {
+      long FRAME_DELAY = 40;
 
-    Tiles tiles = new Tiles();
+      @Override
+      protected Void doInBackground(Void... arg0)
+      {
+        while (!this.isCancelled())
+        {
+          if (HextileEngine.this.renderer.step())
+            HextileEngine.this.requestRender();
+          
+          try
+          {
+            Thread.sleep(FRAME_DELAY);
+          } catch (Exception e) {}
+        }
+        return null;
+      }
+    }
   }
 }
