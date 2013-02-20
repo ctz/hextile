@@ -122,18 +122,24 @@ class HexGeom
     this.hilight.setColor(0x7fffffff);
   }
   
-  void setColour(int colour)
+  static Colour tmp = new Colour();
+  
+  void setColour(Colour colour)
   {
     float darken = 0.8f;
     float lighten = 1.2f;
     
-    Colour.rgbaWrite(this.colours, 0, colour);
-    Colour.rgbaWrite(this.colours, 4, Colour.rgbaMul(colour, lighten));
-    Colour.rgbaWrite(this.colours, 8, Colour.rgbaMul(colour, lighten));
-    Colour.rgbaWrite(this.colours, 12, colour);
-    Colour.rgbaWrite(this.colours, 16, Colour.rgbaMul(colour, darken));
-    Colour.rgbaWrite(this.colours, 20, Colour.rgbaMul(colour, darken));
-    Colour.rgbaWrite(this.colours, 24, colour);
+    colour.write(this.colours, 0)
+          .write(this.colours, 12)
+          .write(this.colours, 24);
+    tmp.set(colour)
+       .mulRGB(lighten)
+       .write(this.colours, 4)
+       .write(this.colours, 8);
+    tmp.set(colour)
+       .mulRGB(darken)
+       .write(this.colours, 16)
+       .write(this.colours, 20);
     
     this.colourBuffer.put(this.colours).position(0);
   }

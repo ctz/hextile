@@ -14,7 +14,7 @@ class TilePosition
   int a3x, a3y;
   int a4x, a4y;
   boolean oddRow;
-  int colour;
+  Colour colour;
 
   TilePosition()
   {
@@ -26,7 +26,7 @@ class TilePosition
     this.a1x = this.a1y = this.a2x = this.a2y = 0;
     this.a3x = this.a3y = this.a4x = this.a4y = 0;
     this.oddRow = false;
-    this.colour = 0xff0000ff;
+    this.colour = new Colour(0xff0000ff);
   }
   
   public String toString()

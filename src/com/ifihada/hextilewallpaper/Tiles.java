@@ -14,7 +14,7 @@ class Tiles
   final float pad = 5f;
   final float padh = pad * Const.sin60;
 
-  int[][] colours;
+  Colour[][] colours;
   
   Tiles()
   {
@@ -47,13 +47,13 @@ class Tiles
         ymax = t.iy;
     }
     
-    int[][] newcolours = new int[xmax + 1][ymax + 1];
+    Colour[][] newcolours = new Colour[xmax + 1][ymax + 1];
     
-    for (int[] column : newcolours)
+    for (Colour[] column : newcolours)
     {
       for (int i = 0; i < column.length; i++)
       {
-        column[i] = BASE_COLOUR;
+        column[i] = new Colour(BASE_COLOUR_INT);
       }
     }
     
@@ -65,14 +65,15 @@ class Tiles
         {
           if (x < xmax && y < ymax)
             newcolours[x][y] = this.colours[x][y];
+          this.colours[x][y] = null;
         }
       }
     }
     
     this.colours = newcolours;
   }
-  
-  final static int BASE_COLOUR = 0x333344ff;
+
+  final static int BASE_COLOUR_INT = 0x333344ff;
   final static int[] COLOURS = new int[]
   {
    0x33b5e5ff,
@@ -81,20 +82,8 @@ class Tiles
    0xffbb33ff,
    0xff4444ff,
   };
-
-  /*
-  final int[][] fixedcolours = new int[][]
-  {
-    // base
-    { 0x333344ff, 0x222233ff },
   
-    { 0x33b5e5ff, 0x0099ccff },
-    { 0xaa66ccff, 0x9933ccff },
-    { 0x99cc00ff, 0x669900ff },
-    { 0xffbb33ff, 0xff8800ff },
-    { 0xff4444ff, 0xcc0000ff }
-  };
-  */
+  final static Colour BASE_COLOUR = new Colour(BASE_COLOUR_INT);
 
   Iterable<TilePosition> eachTile()
   {
@@ -187,27 +176,16 @@ class Tiles
     };
   }
   
-  int getColour(int x, int y)
+  static Colour BLACK = new Colour(0x00000000);
+  
+  Colour getColour(int x, int y)
   {
     if (this.colours == null ||
         x >= this.colours.length ||
         y >= this.colours[x].length)
-      return 0x00000000;
+      return BLACK;
     else
       return this.colours[x][y];
-  }
-  
-  int merge(int target, int x, int y, int density)
-  {
-    if (x < 0 || x >= this.colours.length)
-      return target;
-    if (y < 0 || y >= this.colours[x].length)
-      return target;
-    int source = this.colours[x][y];
-    if (source == Tiles.BASE_COLOUR)
-      return target;
-    else
-      return Colour.rgbaLerp(target, source, density);
   }
   
   void propagate(int sx, int sy, int tx, int ty)
@@ -219,9 +197,7 @@ class Tiles
         ty < 0 || ty >= this.colours[tx].length)
       return;
     
-    int source = this.colours[sx][sy];
-    if (source != Tiles.BASE_COLOUR)
-      this.colours[tx][ty] = Colour.rgbaLerp(this.colours[tx][ty], this.colours[sx][sy], 1);
+    this.colours[tx][ty].lerpRGB(this.colours[sx][sy], 0.02f);
   }
   
   void spread(TilePosition t)
@@ -234,20 +210,8 @@ class Tiles
   
   boolean stepCell(TilePosition t)
   {
-    int target = this.colours[t.ix][t.iy];
-    int original = target;
-    
-    /*
-    target = merge(target, t.a1x, t.a1y, adjDensity);
-    target = merge(target, t.a2x, t.a2y, adjDensity);
-    target = merge(target, t.a3x, t.a3y, adjDensity);
-    target = merge(target, t.a4x, t.a4y, adjDensity);
-    */
-    
-    target = Colour.rgbaLerp(target, Tiles.BASE_COLOUR, 1);
-    if (original != target)
+    if (this.colours[t.ix][t.iy].lerpRGB(Tiles.BASE_COLOUR, 0.01f))
     {
-      this.colours[t.ix][t.iy] = target;
       spread(t);
       return true;
     } else {
@@ -308,7 +272,7 @@ class Tiles
       this.selectedColour = (this.selectedColour + 1) % COLOURS.length;
     }
     
-    this.colours[x][y] = COLOURS[this.selectedColour];
+    this.colours[x][y].setInt(COLOURS[this.selectedColour]);
     return true;
   }
 }
