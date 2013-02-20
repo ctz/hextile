@@ -11,8 +11,8 @@ class Tiles
   int width, height;
   boolean dirty;
 
-  final float pad = 5f;
-  final float padh = pad * Const.sin60;
+  float pad;
+  float padh;
 
   Colour[][] colours;
   
@@ -24,6 +24,14 @@ class Tiles
   Tiles(int w, int h)
   {
     this.resize(w, h);
+    this.sync();
+  }
+
+  public void sync()
+  {
+    this.geom = new HexGeom(Config.TileSize);
+    this.pad = Config.TilePadding;
+    this.padh = this.pad * Const.sin60;
     this.dirty = true;
   }
 
@@ -208,8 +216,22 @@ class Tiles
     propagate(t.ix, t.iy, t.a4x, t.a4y);
   }
   
+  boolean validPosition(int x, int y)
+  {
+    return x >= 0 && x < this.colours.length &&
+           y >= 0 && y < this.colours[x].length;
+  }
+  
+  boolean validPosition(TilePosition t)
+  {
+    return validPosition(t.ix, t.iy);
+  }
+  
   boolean stepCell(TilePosition t)
   {
+    if (!this.validPosition(t))
+      return false;
+    
     if (this.colours[t.ix][t.iy].lerpRGB(Tiles.BASE_COLOUR, 0.01f))
     {
       spread(t);

@@ -1,0 +1,5 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <com.ifihada.hextilewallpaper.prefs.ColourPreference
+        android:key="base_colour"
+        android:title="@string/pref_title_base_colour" />
+</PreferenceScreen>

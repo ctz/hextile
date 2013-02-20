@@ -1,15 +1,47 @@
 package com.ifihada.hextilewallpaper;
 
+import com.ifihada.hextilewallpaper.prefs.SettingsActivity;
+
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 import net.rbgrn.android.glwallpaperservice.GLWallpaperService;
 
 public class HextileService extends GLWallpaperService
 {
+  static HextileEngine latestEngine;
+  
   @Override
   public Engine onCreateEngine()
   {
-    return new HextileEngine();
+    this.readSetting(SettingsActivity.SIZE_PREF);
+    this.readSetting(SettingsActivity.GAP_PREF);
+    HextileService.latestEngine = new HextileEngine();
+    return HextileService.latestEngine;
+  }
+  
+  private void readSetting(String key)
+  {
+    HextileService.applySetting(key,
+                                PreferenceManager.getDefaultSharedPreferences(this)
+                                                 .getString(key,  "")
+                               );
+  }
+  
+  public static void applySetting(String key, String value)
+  {
+    if (value == null || value.equals(""))
+      return;
+    
+    if (key.equals(SettingsActivity.SIZE_PREF))
+    {
+      Config.TileSize = Integer.parseInt(value);
+    } else if (key.equals(SettingsActivity.GAP_PREF)) {
+      Config.TilePadding = Integer.parseInt(value);
+    }
+    
+    if (HextileService.latestEngine != null)
+      HextileService.latestEngine.sync();
   }
 
   class HextileEngine extends GLEngine
@@ -25,6 +57,11 @@ public class HextileService extends GLWallpaperService
       this.setRenderMode(RENDERMODE_WHEN_DIRTY);
       this.setTouchEventsEnabled(true);
       this.start();
+    }
+    
+    public void sync()
+    {
+      this.renderer.sync();
     }
     
     boolean inBatch = false;

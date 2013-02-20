@@ -1,0 +1,22 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    
+    <ListPreference
+        android:defaultValue="@string/pref_size_default"
+        android:entries="@array/pref_size_titles"
+        android:entryValues="@array/pref_size_values"
+        android:key="size"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_size" />
+    
+    <ListPreference
+        android:defaultValue="@string/pref_gap_default"
+        android:entries="@array/pref_gap_titles"
+        android:entryValues="@array/pref_gap_values"
+        android:key="gap"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_gap" />
+    
+</PreferenceScreen>

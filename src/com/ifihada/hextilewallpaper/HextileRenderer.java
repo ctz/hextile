@@ -13,6 +13,14 @@ public class HextileRenderer implements GLWallpaperService.Renderer
   {
   }
   
+  public void sync()
+  {
+    synchronized (this)
+    {
+      this.tiles.sync();
+    }
+  }
+  
   public boolean step()
   {
     synchronized (this)
