@@ -1,23 +1,29 @@
 package com.ifihada.hextilewallpaper;
 
+import java.util.WeakHashMap;
+
 import com.ifihada.hextilewallpaper.prefs.SettingsActivity;
 
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.MotionEvent;
 import net.rbgrn.android.glwallpaperservice.GLWallpaperService;
 
 public class HextileService extends GLWallpaperService
 {
-  static HextileEngine latestEngine;
+  static WeakHashMap<HextileEngine, String> recentEngines = new WeakHashMap<HextileEngine, String>(); 
   
   @Override
   public Engine onCreateEngine()
   {
     this.readSetting(SettingsActivity.SIZE_PREF);
     this.readSetting(SettingsActivity.GAP_PREF);
-    HextileService.latestEngine = new HextileEngine();
-    return HextileService.latestEngine;
+    
+    HextileEngine e = new HextileEngine();
+    
+    HextileService.recentEngines.put(e, null);
+    return e;
   }
   
   private void readSetting(String key)
@@ -35,17 +41,26 @@ public class HextileService extends GLWallpaperService
     
     if (key.equals(SettingsActivity.SIZE_PREF))
     {
-      Config.TileSize = Integer.parseInt(value);
+      Config.setTileSize(Integer.parseInt(value));
     } else if (key.equals(SettingsActivity.GAP_PREF)) {
-      Config.TilePadding = Integer.parseInt(value);
+      Config.setTilePadding(Integer.parseInt(value));
     }
     
-    if (HextileService.latestEngine != null)
-      HextileService.latestEngine.sync();
+    HextileService.syncEngines();
+  }
+  
+  private static void syncEngines()
+  {
+    for (HextileEngine e : HextileService.recentEngines.keySet())
+    {
+      if (e != null)
+        e.sync();
+    }
   }
 
   class HextileEngine extends GLEngine
   {
+    static final String TAG = "HextileEngine";
     HextileRenderer renderer;
     
     public HextileEngine()
@@ -53,6 +68,7 @@ public class HextileService extends GLWallpaperService
       super();
 
       this.renderer = new HextileRenderer(this);
+      this.setEGLConfigChooser(8, 8, 8, 8, 0, 0);
       this.setRenderer(this.renderer);
       this.setRenderMode(RENDERMODE_WHEN_DIRTY);
       this.setTouchEventsEnabled(true);
@@ -120,6 +136,7 @@ public class HextileService extends GLWallpaperService
       @Override
       protected Void doInBackground(Void... arg0)
       {
+        Log.v(TAG, "RenderTask starting");
         while (!this.isCancelled())
         {
           if (HextileEngine.this.renderer.step())
@@ -130,6 +147,7 @@ public class HextileService extends GLWallpaperService
             Thread.sleep(FRAME_DELAY);
           } catch (Exception e) {}
         }
+        Log.v(TAG, "RenderTask completed");
         return null;
       }
     }

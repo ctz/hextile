@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.util.Log;
+
 class Tiles
 {
   static final String TAG = "Tiles";
@@ -29,8 +31,9 @@ class Tiles
 
   public void sync()
   {
-    this.geom = new HexGeom(Config.TileSize);
-    this.pad = Config.TilePadding;
+    Log.v(TAG, "Tiles sync'd");
+    this.geom = new HexGeom(Config.getTileSize());
+    this.pad = Config.getTilePadding();
     this.padh = this.pad * Const.sin60;
     this.dirty = true;
   }
@@ -205,7 +208,7 @@ class Tiles
         ty < 0 || ty >= this.colours[tx].length)
       return;
     
-    this.colours[tx][ty].lerpRGB(this.colours[sx][sy], 0.02f);
+    this.colours[tx][ty].lerpRGB(this.colours[sx][sy], 0.025f);
   }
   
   void spread(TilePosition t)

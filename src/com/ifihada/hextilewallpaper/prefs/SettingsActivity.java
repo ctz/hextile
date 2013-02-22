@@ -82,10 +82,7 @@ public class SettingsActivity extends PreferenceActivity
         preference.setSummary(stringValue);
       }
       
-      HextileService.applySetting(preference.getKey(),
-                                  PreferenceManager
-                                    .getDefaultSharedPreferences(preference.getContext())
-                                    .getString(preference.getKey(), ""));
+      HextileService.applySetting(preference.getKey(), stringValue);
       return true;
     }
   };
