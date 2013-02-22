@@ -1,34 +1,56 @@
 package com.ifihada.hextilewallpaper;
 
+import android.annotation.SuppressLint;
+
 public class Colour
 {
   float r, g, b, a;
   
-  Colour()
+  public Colour()
   {
     this(0);
   }
   
-  Colour(int c)
+  private Colour(int c)
   {
-    this.setInt(c);
+    this.setRGBA(c);
   }
   
-  Colour(Colour x)
+  public Colour(Colour x)
   {
-    this.r = x.r;
-    this.g = x.g;
-    this.b = x.b;
-    this.a = x.a;
+    this.set(x);
   }
   
-  public Colour setInt(int c)
+  public Colour setRGBA(int c)
   {
-    this.r = R(c) / 255f;
-    this.g = G(c) / 255f;
-    this.b = B(c) / 255f;
-    this.a = A(c) / 255f;
+    this.r = RGBA_R(c) / 255f;
+    this.g = RGBA_G(c) / 255f;
+    this.b = RGBA_B(c) / 255f;
+    this.a = RGBA_A(c) / 255f;
     return this;
+  }
+  
+  public Colour setARGB(int c)
+  {
+    this.r = ARGB_R(c) / 255f;
+    this.g = ARGB_G(c) / 255f;
+    this.b = ARGB_B(c) / 255f;
+    this.a = ARGB_A(c) / 255f;
+    return this;
+  }
+  
+  public static Colour fromRGBA(int c)
+  {
+    Colour out = new Colour();
+    out.setRGBA(c);
+    return out;
+  }
+  
+  public static Colour fromARGB(int c)
+  {
+    Colour out = new Colour();
+    out.setARGB(c);
+    return out;
   }
   
   public Colour set(Colour other)
@@ -40,6 +62,17 @@ public class Colour
     return this;
   }
   
+  @SuppressLint("DefaultLocale")
+  public String toString()
+  {
+    int argb = this.getARGB();
+    return String.format("#%06x - rgb(%d, %d, %d)",
+                         argb & 0xffffff,
+                         Colour.ARGB_R(argb),
+                         Colour.ARGB_G(argb),
+                         Colour.ARGB_B(argb));
+  }
+  
   public Colour write(float[] f, int offs)
   {
     f[offs + 0] = this.r;
@@ -49,14 +82,35 @@ public class Colour
     return this;
   }
   
+  public int getARGB()
+  {
+    int ia, ir, ig, ib;
+
+    ia = (int) (this.a * 255);
+    ir = (int) (this.r * 255);
+    ig = (int) (this.g * 255);
+    ib = (int) (this.b * 255);
+    
+    ia &= 0xff;
+    ir &= 0xff;
+    ig &= 0xff;
+    ib &= 0xff;
+    
+    return ia << 24 | ir << 16 | ig << 8 | ib; 
+  }
+  
+  public boolean equalsOrClose(Colour target)
+  {
+    float resolution = 0.005f;
+    return (this.r == target.r || nearEnough(this.r, target.r, resolution)) &&
+           (this.g == target.g || nearEnough(this.g, target.g, resolution)) &&
+           (this.b == target.b || nearEnough(this.b, target.b, resolution));
+  }
+  
   // returns false if already at or close to target
   public boolean lerpRGB(Colour target, float alpha)
   {
-    float resolution = 0.01f;
-    
-    if ((this.r == target.r || nearEnough(this.r, target.r, resolution)) &&
-        (this.g == target.g || nearEnough(this.g, target.g, resolution)) &&
-        (this.b == target.b || nearEnough(this.b, target.b, resolution)))
+    if (this.equalsOrClose(target))
     {
       this.r = target.r;
       this.g = target.g;
@@ -98,8 +152,14 @@ public class Colour
     return x;
   }
 
-  static int R(int c) { return c >> 24 & 0xff; }
-  static int G(int c) { return c >> 16 & 0xff; }
-  static int B(int c) { return c >> 8 & 0xff; }
-  static int A(int c) { return c & 0xff; }
+  // Assume RGBA
+  static int RGBA_R(int c) { return c >> 24 & 0xff; }
+  static int RGBA_G(int c) { return c >> 16 & 0xff; }
+  static int RGBA_B(int c) { return c >> 8 & 0xff; }
+  static int RGBA_A(int c) { return c & 0xff; }
+  
+  static int ARGB_A(int c) { return c >> 24 & 0xff; }
+  static int ARGB_R(int c) { return c >> 16 & 0xff; }
+  static int ARGB_G(int c) { return c >> 8 & 0xff; }
+  static int ARGB_B(int c) { return c & 0xff; }
 }

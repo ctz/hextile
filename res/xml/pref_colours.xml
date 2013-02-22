@@ -1,5 +1,35 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    <com.ifihada.hextilewallpaper.prefs.ColourPreference
+    <yuku.ambilwarna.widget.AmbilWarnaPreference
         android:key="base_colour"
+        android:defaultValue="0xff333344"
         android:title="@string/pref_title_base_colour" />
+    
+    <yuku.ambilwarna.widget.AmbilWarnaPreference
+        android:key="feat_colour_1"
+        android:defaultValue="0xff33b5e5"
+        android:title="@string/pref_title_feat_colour_1" />
+    
+    <yuku.ambilwarna.widget.AmbilWarnaPreference
+        android:key="feat_colour_2"
+        android:defaultValue="0xffaa66cc"
+        android:title="@string/pref_title_feat_colour_2" />
+    
+    <yuku.ambilwarna.widget.AmbilWarnaPreference
+        android:key="feat_colour_3"
+        android:defaultValue="0xff99cc00"
+        android:title="@string/pref_title_feat_colour_3" />
+    
+    <yuku.ambilwarna.widget.AmbilWarnaPreference
+        android:key="feat_colour_4"
+        android:defaultValue="0xffffbb33"
+        android:title="@string/pref_title_feat_colour_4" />
+    
+    <yuku.ambilwarna.widget.AmbilWarnaPreference
+        android:key="feat_colour_5"
+        android:defaultValue="0xffff4444"
+        android:title="@string/pref_title_feat_colour_5" />
+    
+    <Preference
+        android:key="reset_colours"
+        android:title="@string/pref_title_reset_colours" />
 </PreferenceScreen>

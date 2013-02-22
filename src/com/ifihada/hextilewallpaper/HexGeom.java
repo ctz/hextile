@@ -6,7 +6,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import javax.microedition.khronos.opengles.GL10;
-import android.graphics.Paint;
 
 class HexGeom
 {
@@ -17,7 +16,6 @@ class HexGeom
   private final float[] verts;
   private final float[] colours;
   private final short[] indices, topLineIndices, bottomLineIndices;
-  private final Paint shadow, hilight;
 
   private FloatBuffer vertexBuffer;
   private FloatBuffer colourBuffer;
@@ -115,11 +113,6 @@ class HexGeom
     this.indexBuffer = toShortBuffer(this.indices);
     this.topLineBuffer = toShortBuffer(this.topLineIndices);
     this.bottomLineBuffer = toShortBuffer(this.bottomLineIndices);
-
-    this.shadow = new Paint(Paint.ANTI_ALIAS_FLAG);
-    this.shadow.setColor(0x5f000000);
-    this.hilight = new Paint(Paint.ANTI_ALIAS_FLAG);
-    this.hilight.setColor(0x7fffffff);
   }
   
   static Colour tmp = new Colour();

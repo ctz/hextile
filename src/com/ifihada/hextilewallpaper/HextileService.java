@@ -4,6 +4,7 @@ import java.util.WeakHashMap;
 
 import com.ifihada.hextilewallpaper.prefs.SettingsActivity;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -12,25 +13,43 @@ import net.rbgrn.android.glwallpaperservice.GLWallpaperService;
 
 public class HextileService extends GLWallpaperService
 {
+  static final String TAG = HextileService.class.getSimpleName();
   static WeakHashMap<HextileEngine, String> recentEngines = new WeakHashMap<HextileEngine, String>(); 
   
   @Override
   public Engine onCreateEngine()
   {
-    this.readSetting(SettingsActivity.SIZE_PREF);
-    this.readSetting(SettingsActivity.GAP_PREF);
-    
+    HextileService.readSettings(this);
     HextileEngine e = new HextileEngine();
     
     HextileService.recentEngines.put(e, null);
     return e;
   }
   
-  private void readSetting(String key)
+  public static void readSettings(Context ctx)
+  {
+    HextileService.readStrSetting(ctx, SettingsActivity.SIZE_PREF);
+    HextileService.readStrSetting(ctx, SettingsActivity.GAP_PREF);
+    HextileService.readIntSetting(ctx, SettingsActivity.BASE_COLOUR_PREF);
+    HextileService.readIntSetting(ctx, SettingsActivity.FEAT_COLOUR_PREF_1);
+    HextileService.readIntSetting(ctx, SettingsActivity.FEAT_COLOUR_PREF_2);
+    HextileService.readIntSetting(ctx, SettingsActivity.FEAT_COLOUR_PREF_3);
+    HextileService.readIntSetting(ctx, SettingsActivity.FEAT_COLOUR_PREF_4);
+    HextileService.readIntSetting(ctx, SettingsActivity.FEAT_COLOUR_PREF_5);
+  }
+  
+  private static void readStrSetting(Context ctx, String key)
   {
     HextileService.applySetting(key,
-                                PreferenceManager.getDefaultSharedPreferences(this)
+                                PreferenceManager.getDefaultSharedPreferences(ctx)
                                                  .getString(key,  "")
+                               );
+  }
+  
+  private static void readIntSetting(Context ctx, String key)
+  {
+    HextileService.applySetting(key,
+                                Integer.toString(PreferenceManager.getDefaultSharedPreferences(ctx).getInt(key, 0))
                                );
   }
   
@@ -44,11 +63,33 @@ public class HextileService extends GLWallpaperService
       Config.setTileSize(Integer.parseInt(value));
     } else if (key.equals(SettingsActivity.GAP_PREF)) {
       Config.setTilePadding(Integer.parseInt(value));
+    } else if (key.equals(SettingsActivity.BASE_COLOUR_PREF)) {
+      Config.setBaseColour(parseColour(value));
+    } else if (key.equals(SettingsActivity.FEAT_COLOUR_PREF_1)) {
+      Config.setFeatureColour(0, parseColour(value));
+    } else if (key.equals(SettingsActivity.FEAT_COLOUR_PREF_2)) {
+      Config.setFeatureColour(1, parseColour(value));
+    } else if (key.equals(SettingsActivity.FEAT_COLOUR_PREF_3)) {
+      Config.setFeatureColour(2, parseColour(value));
+    } else if (key.equals(SettingsActivity.FEAT_COLOUR_PREF_4)) {
+      Config.setFeatureColour(3, parseColour(value));
+    } else if (key.equals(SettingsActivity.FEAT_COLOUR_PREF_5)) {
+      Config.setFeatureColour(4, parseColour(value));
+    } else {
+      Log.v(TAG, "unhandled setting input, key = " + key);
     }
     
     HextileService.syncEngines();
   }
   
+  private static Colour parseColour(String value)
+  {
+    Integer argb = Integer.parseInt(value);
+    Colour c = new Colour();
+    c.setARGB(argb);
+    return c;
+  }
+
   private static void syncEngines()
   {
     for (HextileEngine e : HextileService.recentEngines.keySet())
@@ -80,7 +121,7 @@ public class HextileService extends GLWallpaperService
       this.renderer.sync();
     }
     
-    boolean inBatch = false;
+    int selectedColour = 0;
     boolean isVisible = true;
     RenderTask renderTask = null;
     
@@ -89,13 +130,13 @@ public class HextileService extends GLWallpaperService
     {
       for (int p = 0; p < ev.getPointerCount(); p++)
       {
-        this.renderer.tiles.handleTouch(ev.getX(p), ev.getY(p), !inBatch);
-        inBatch = true;
+        this.renderer.tiles.handleTouch(ev.getX(p), ev.getY(p), this.selectedColour);
       }
       
       if (ev.getAction() == MotionEvent.ACTION_UP)
       {
-        this.inBatch = false;
+        this.selectedColour++;
+        this.selectedColour %= Config.featureColourCount;
       }
     }
     

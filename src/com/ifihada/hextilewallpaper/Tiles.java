@@ -59,12 +59,13 @@ class Tiles
     }
     
     Colour[][] newcolours = new Colour[xmax + 1][ymax + 1];
+    Colour base = Config.getBaseColour();
     
     for (Colour[] column : newcolours)
     {
       for (int i = 0; i < column.length; i++)
       {
-        column[i] = new Colour(BASE_COLOUR_INT);
+        column[i] = new Colour(base);
       }
     }
     
@@ -83,18 +84,6 @@ class Tiles
     
     this.colours = newcolours;
   }
-
-  final static int BASE_COLOUR_INT = 0x333344ff;
-  final static int[] COLOURS = new int[]
-  {
-   0x33b5e5ff,
-   0xaa66ccff,
-   0x99cc00ff,
-   0xffbb33ff,
-   0xff4444ff,
-  };
-  
-  final static Colour BASE_COLOUR = new Colour(BASE_COLOUR_INT);
 
   Iterable<TilePosition> eachTile()
   {
@@ -187,7 +176,7 @@ class Tiles
     };
   }
   
-  static Colour BLACK = new Colour(0x00000000);
+  static Colour BLACK = Colour.fromRGBA(0x00000000);
   
   Colour getColour(int x, int y)
   {
@@ -235,7 +224,7 @@ class Tiles
     if (!this.validPosition(t))
       return false;
     
-    if (this.colours[t.ix][t.iy].lerpRGB(Tiles.BASE_COLOUR, 0.01f))
+    if (this.colours[t.ix][t.iy].lerpRGB(Config.getBaseColour(), 0.01f))
     {
       spread(t);
       return true;
@@ -273,13 +262,13 @@ class Tiles
     return changed;
   }
 
-  boolean handleTouch(float touchx, float touchy, boolean firstInBatch)
+  boolean handleTouch(float touchx, float touchy, int colour)
   {
     for (TilePosition t : this.eachTile())
     {
       if (this.geom.within(t.cx, t.y, touchx, touchy))
       {
-        this.pointTouched(t.ix, t.iy, firstInBatch);
+        this.pointTouched(t.ix, t.iy, colour);
         this.dirty = true;
         return true;
       }
@@ -287,17 +276,10 @@ class Tiles
     
     return false;
   }
-  
-  private int selectedColour = 0;
 
-  private boolean pointTouched(int x, int y, boolean firstInBatch)
-  {
-    if (firstInBatch)
-    {
-      this.selectedColour = (this.selectedColour + 1) % COLOURS.length;
-    }
-    
-    this.colours[x][y].setInt(COLOURS[this.selectedColour]);
+  private boolean pointTouched(int x, int y, int colour)
+  {    
+    this.colours[x][y].set(Config.getFeatureColour(colour));
     return true;
   }
 }

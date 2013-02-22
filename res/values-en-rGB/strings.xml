@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources >
+    <string name="really_reset_colours">Really reset colours?</string>
+    <string name="pref_title_base_colour">Base colour</string>
+    <string name="pref_title_feat_colour_1">Touch colour 1</string>
+    <string name="pref_title_feat_colour_2">Touch colour 2</string>
+    <string name="pref_title_feat_colour_3">Touch colour 3</string>
+    <string name="pref_title_feat_colour_4">Touch colour 4</string>
+    <string name="pref_title_feat_colour_5">Touch colour 5</string>
+    <string name="pref_title_reset_colours">Reset colours to default</string>
+
+</resources>

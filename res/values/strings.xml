@@ -1,6 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">Hextile Wallpaper</string>
+    <string name="really_reset_colours_title">Confirm</string>
+    <string name="really_reset_colours">Really reset colors?</string>
 
+    <string name="title_activity_settings">Hextile Settings</string>
+
+    <string name="pref_header_general">General</string>
+    <string name="pref_header_layout">Layout</string>
+    <string name="pref_header_colours">Colors</string>
+    
+    <string name="pref_title_gap">Gap between tiles</string>
+    <string name="pref_title_size">Tile size</string>
+    <string name="pref_title_base_colour">Base color</string>
+    <string name="pref_title_feat_colour_1">Touch color 1</string>
+    <string name="pref_title_feat_colour_2">Touch color 2</string>
+    <string name="pref_title_feat_colour_3">Touch color 3</string>
+    <string name="pref_title_feat_colour_4">Touch color 4</string>
+    <string name="pref_title_feat_colour_5">Touch color 5</string>
+    <string name="pref_title_reset_colours">Reset colors to default</string>
+
+    <string-array name="pref_gap_titles">
+        <item>None</item>
+        <item>Small</item>
+        <item>Medium</item>
+        <item>Large</item>
+    </string-array>
+    <string-array name="pref_gap_values">
+        <item>0</item>
+        <item>3</item>
+        <item>6</item>
+        <item>12</item>
+    </string-array>
+    <string name="pref_gap_default">6</string>
+
+    <string-array name="pref_size_titles">
+        <item>Small</item>
+        <item>Medium</item>
+        <item>Large</item>
+    </string-array>
+    <string-array name="pref_size_values">
+        <item>40</item>
+        <item>60</item>
+        <item>100</item>
+    </string-array>
+    <string name="pref_size_default">60</string>
 </resources>

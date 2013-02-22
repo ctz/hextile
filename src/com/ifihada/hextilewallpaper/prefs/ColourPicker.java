@@ -1,3 +1,5 @@
+/* UNUSED! */
+
 package com.ifihada.hextilewallpaper.prefs;
 
 import android.content.Context;

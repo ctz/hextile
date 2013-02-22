@@ -1,5 +1,7 @@
 package com.ifihada.hextilewallpaper;
 
+import android.annotation.SuppressLint;
+
 class TilePosition
 {
   float x;
@@ -26,9 +28,10 @@ class TilePosition
     this.a1x = this.a1y = this.a2x = this.a2y = 0;
     this.a3x = this.a3y = this.a4x = this.a4y = 0;
     this.oddRow = false;
-    this.colour = new Colour(0xff0000ff);
+    this.colour = Colour.fromRGBA(0xff0000ff);
   }
   
+  @SuppressLint("DefaultLocale")
   public String toString()
   {
     return String.format("TilePosition[%f->%f,%f][%d,%d][%s]",
