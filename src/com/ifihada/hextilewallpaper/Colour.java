@@ -38,6 +38,11 @@ public class Colour
     this.a = ARGB_A(c) / 255f;
     return this;
   }
+
+  public boolean isValid()
+  {
+    return this.a > 0;
+  }
   
   public static Colour fromRGBA(int c)
   {

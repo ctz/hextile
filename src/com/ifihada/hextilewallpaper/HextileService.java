@@ -84,7 +84,7 @@ public class HextileService extends GLWallpaperService
   
   private static Colour parseColour(String value)
   {
-    Integer argb = Integer.parseInt(value);
+    int argb = Integer.parseInt(value);
     Colour c = new Colour();
     c.setARGB(argb);
     return c;

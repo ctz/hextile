@@ -53,7 +53,8 @@ public class Config
   
   public static void setBaseColour(Colour c)
   {
-    Config.baseColour = c;
+    if (c.isValid())
+      Config.baseColour = c;
   }
   
   public static Colour getBaseColour()
@@ -63,7 +64,7 @@ public class Config
   
   public static void setFeatureColour(int i, Colour c)
   {
-    if (i >= 0 && i < Config.featureColours.length)
+    if (i >= 0 && i < Config.featureColours.length && c.isValid())
       Config.featureColours[i] = c;
   }
   
