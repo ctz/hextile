@@ -40,6 +40,7 @@ class Tiles
 
   void resize(int w, int h)
   {
+    Log.v(TAG, "Tiles resized");
     this.width = w;
     this.height = h;
     this.onResize();
@@ -84,6 +85,14 @@ class Tiles
     
     this.colours = newcolours;
   }
+  
+  float lowBound(int w, float s)
+  {
+    float w2 = w / 2;
+    int n = (int) (w2 / s);
+    n += 2;
+    return w2 - s * n;
+  }
 
   Iterable<TilePosition> eachTile()
   {
@@ -98,13 +107,13 @@ class Tiles
           boolean first = true;
 
           /* low, hi, step */
-          float ly = geom.d * -2;
           float hy = height + geom.d;
           float sy = geom.h + padh;
+          float ly = lowBound(height, sy);
 
-          float lx = geom.d * -2;
           float hx = width + geom.d;
           float sx = geom.d + geom.r + pad * 2;
+          float lx = lowBound(width, sx);
 
           @Override
           public boolean hasNext()
@@ -253,6 +262,9 @@ class Tiles
       if (this.stepCell(t))
         changed = true;
     }
+    
+    if (!changed && this.dirty)
+      Log.v(TAG, "renderer stopping");
     
     if (changed)
       this.dirty = true;
