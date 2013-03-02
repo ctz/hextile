@@ -162,9 +162,15 @@ class HexGeom
     gl.glColor4f(0f, 0f, 0f, 0.5f);
     gl.glDrawElements(GL10.GL_LINES, this.bottomLineIndices.length, GL10.GL_UNSIGNED_SHORT, this.bottomLineBuffer);
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
-    }
+  }
+  
+  boolean withinRadius(float ox, float oy, float tx, float ty)
+  {
+    float dist = (float) Math.hypot(ox - tx, oy - ty);
+    return dist < this.r;
+  }
 
-  boolean within(float ox, float oy, float tx, float ty)
+  boolean withinInnerBox(float ox, float oy, float tx, float ty)
   {
     return ox - w < tx && ox + w > tx && oy - h < ty && oy + h > ty;
   }

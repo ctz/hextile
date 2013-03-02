@@ -278,7 +278,7 @@ class Tiles
   {
     for (TilePosition t : this.eachTile())
     {
-      if (this.geom.within(t.cx, t.y, touchx, touchy))
+      if (this.geom.withinRadius(t.cx, t.y, touchx, touchy))
       {
         this.pointTouched(t.ix, t.iy, colour);
         this.dirty = true;
