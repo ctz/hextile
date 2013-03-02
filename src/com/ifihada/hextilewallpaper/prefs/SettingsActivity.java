@@ -2,6 +2,7 @@ package com.ifihada.hextilewallpaper.prefs;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -21,6 +22,8 @@ public class SettingsActivity extends PreferenceActivity
 {
   public static final String SIZE_PREF = "size";
   public static final String GAP_PREF = "gap";
+  public static final String HIGHLIGHT_PREF = "highlight";
+  public static final String SHADING_PREF = "shading";
   public static final String BASE_COLOUR_PREF = "base_colour";
   public static final String FEAT_COLOUR_PREF_1 = "feat_colour_1";
   public static final String FEAT_COLOUR_PREF_2 = "feat_colour_2";
@@ -46,12 +49,19 @@ public class SettingsActivity extends PreferenceActivity
     addPreferencesFromResource(R.xml.pref_layout);
 
     fakeHeader = new PreferenceCategory(this);
+    fakeHeader.setTitle(R.string.pref_header_style);
+    getPreferenceScreen().addPreference(fakeHeader);
+    addPreferencesFromResource(R.xml.pref_style);
+
+    fakeHeader = new PreferenceCategory(this);
     fakeHeader.setTitle(R.string.pref_header_colours);
     getPreferenceScreen().addPreference(fakeHeader);
     addPreferencesFromResource(R.xml.pref_colours);
 
     bindPreferenceSummaryToValue(findPreference(SIZE_PREF));
     bindPreferenceSummaryToValue(findPreference(GAP_PREF));
+    bindPreferenceSummaryToValue(findPreference(SHADING_PREF));
+    bindPreferenceSummaryToValue(findPreference(HIGHLIGHT_PREF));
     this.bindColourPrefs();
     this.updateResetButton();
     
@@ -162,8 +172,6 @@ public class SettingsActivity extends PreferenceActivity
 
         // Set the summary to reflect the new value.
         preference.setSummary(index >= 0 ? listPreference.getEntries()[index] : null);
-      } else if (preference instanceof AmbilWarnaPreference) {
-        
       } else {
         // For all other preferences, set the summary to the value's
         // simple string representation.
@@ -185,10 +193,11 @@ public class SettingsActivity extends PreferenceActivity
 
     // Trigger the listener immediately with the preference's
     // current value.
-    SettingsActivity.bindPreferenceSummary.onPreferenceChange(preference,
-                                                              PreferenceManager
-                                                                 .getDefaultSharedPreferences(preference.getContext())
-                                                                 .getString(preference.getKey(), ""));
+    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(preference.getContext());
+    Object o = prefs.getAll().get(preference.getKey());
+    
+    if (o != null)
+      SettingsActivity.bindPreferenceSummary.onPreferenceChange(preference, o);
   }
   
   private static void bindColourPreference(Preference pref, Preference.OnPreferenceChangeListener listener)

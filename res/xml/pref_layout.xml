@@ -1,6 +1,4 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    
     <ListPreference
         android:defaultValue="@string/pref_size_default"
         android:entries="@array/pref_size_titles"
@@ -18,5 +16,4 @@
         android:negativeButtonText="@null"
         android:positiveButtonText="@null"
         android:title="@string/pref_title_gap" />
-    
 </PreferenceScreen>

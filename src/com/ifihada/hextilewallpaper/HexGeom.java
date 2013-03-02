@@ -116,23 +116,47 @@ class HexGeom
   }
   
   static Colour tmp = new Colour();
-  
-  void setColour(Colour colour)
+  boolean shading = true;
+  boolean highlighting = true;
+
+  void setShading(boolean shading)
   {
-    float darken = 0.8f;
-    float lighten = 1.2f;
-    
-    colour.write(this.colours, 0)
-          .write(this.colours, 12)
-          .write(this.colours, 24);
-    tmp.set(colour)
-       .mulRGB(lighten)
-       .write(this.colours, 4)
-       .write(this.colours, 8);
-    tmp.set(colour)
-       .mulRGB(darken)
-       .write(this.colours, 16)
-       .write(this.colours, 20);
+    this.shading = shading;
+  }
+
+  void setHighlighting(boolean highlighting)
+  {
+    this.highlighting = highlighting;
+  }
+  
+  private void setColour(Colour colour)
+  {
+    if (this.shading)
+    {
+      float darken = 0.8f;
+      float lighten = 1.2f;
+      
+      colour.write(this.colours, 0)
+            .write(this.colours, 12)
+            .write(this.colours, 24);
+      
+      tmp.set(colour)
+         .mulRGB(lighten)
+         .write(this.colours, 4)
+         .write(this.colours, 8);
+      tmp.set(colour)
+         .mulRGB(darken)
+         .write(this.colours, 16)
+         .write(this.colours, 20);
+    } else {
+      colour.write(this.colours, 0)
+            .write(this.colours, 4)
+            .write(this.colours, 8)
+            .write(this.colours, 12)
+            .write(this.colours, 16)
+            .write(this.colours, 20)
+            .write(this.colours, 24);
+    }
     
     this.colourBuffer.put(this.colours).position(0);
   }
@@ -156,11 +180,15 @@ class HexGeom
     gl.glDrawElements(GL10.GL_TRIANGLES, this.indices.length, GL10.GL_UNSIGNED_SHORT, this.indexBuffer);
     gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
     
-    gl.glColor4f(1f, 1f, 1f, 0.5f);
-    gl.glDrawElements(GL10.GL_LINES, this.topLineIndices.length, GL10.GL_UNSIGNED_SHORT, this.topLineBuffer);
+    if (this.highlighting)
+    {
+      gl.glColor4f(1f, 1f, 1f, 0.5f);
+      gl.glDrawElements(GL10.GL_LINES, this.topLineIndices.length, GL10.GL_UNSIGNED_SHORT, this.topLineBuffer);
+      
+      gl.glColor4f(0f, 0f, 0f, 0.5f);
+      gl.glDrawElements(GL10.GL_LINES, this.bottomLineIndices.length, GL10.GL_UNSIGNED_SHORT, this.bottomLineBuffer);
+    }
     
-    gl.glColor4f(0f, 0f, 0f, 0.5f);
-    gl.glDrawElements(GL10.GL_LINES, this.bottomLineIndices.length, GL10.GL_UNSIGNED_SHORT, this.bottomLineBuffer);
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
   }
   

@@ -8,5 +8,7 @@
         android:title="@string/pref_header_layout" />
     <header
         android:title="@string/pref_header_colours" />
+    <header
+        android:title="@string/pref_header_style" />
 
 </preference-headers>

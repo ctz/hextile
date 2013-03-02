@@ -6,7 +6,9 @@ public class Config
 {
   private static final String TAG = "Config";
   private static int tileSize = 60;
-  private static int tilePadding = 6;
+  private static int tilePadding = 3;
+  private static boolean shading = true;
+  private static boolean highlighting = true;
   
   // Colours here are RGBA
   public final static Colour DEFAULT_BASE_COLOUR = Colour.fromRGBA(0x333344ff);
@@ -75,5 +77,24 @@ public class Config
     else
       return Config.getBaseColour();
   }
-    
+  
+  public static boolean getShading()
+  {
+    return Config.shading;
+  }
+  
+  public static void setShading(boolean onoff)
+  {
+    Config.shading = onoff;
+  }
+  
+  public static boolean getHighlighting()
+  {
+    return Config.highlighting;
+  }
+  
+  public static void setHighlighting(boolean onoff)
+  {
+    Config.highlighting = onoff;
+  }
 }

@@ -21,6 +21,14 @@ public class HextileRenderer implements GLWallpaperService.Renderer
     }
   }
   
+  public void initial()
+  {
+    synchronized (this)
+    {
+      this.tiles.dirty = true;
+    }
+  }
+  
   public boolean step()
   {
     synchronized (this)
@@ -67,6 +75,7 @@ public class HextileRenderer implements GLWallpaperService.Renderer
   @Override
   public void onSurfaceCreated(GL10 gl, EGLConfig cnf)
   {
+    this.initial();
   }
   
   public void release()

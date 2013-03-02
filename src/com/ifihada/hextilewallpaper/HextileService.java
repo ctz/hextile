@@ -5,6 +5,7 @@ import java.util.WeakHashMap;
 import com.ifihada.hextilewallpaper.prefs.SettingsActivity;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -30,6 +31,8 @@ public class HextileService extends GLWallpaperService
   {
     HextileService.readStrSetting(ctx, SettingsActivity.SIZE_PREF);
     HextileService.readStrSetting(ctx, SettingsActivity.GAP_PREF);
+    HextileService.readBooleanSetting(ctx, SettingsActivity.HIGHLIGHT_PREF);
+    HextileService.readBooleanSetting(ctx, SettingsActivity.SHADING_PREF);
     HextileService.readIntSetting(ctx, SettingsActivity.BASE_COLOUR_PREF);
     HextileService.readIntSetting(ctx, SettingsActivity.FEAT_COLOUR_PREF_1);
     HextileService.readIntSetting(ctx, SettingsActivity.FEAT_COLOUR_PREF_2);
@@ -44,6 +47,14 @@ public class HextileService extends GLWallpaperService
                                 PreferenceManager.getDefaultSharedPreferences(ctx)
                                                  .getString(key,  "")
                                );
+  }
+  
+  private static void readBooleanSetting(Context ctx, String key)
+  {
+    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+    
+    if (prefs.contains(key))
+      HextileService.applySetting(key, Boolean.toString(prefs.getBoolean(key, false)));
   }
   
   private static void readIntSetting(Context ctx, String key)
@@ -63,6 +74,10 @@ public class HextileService extends GLWallpaperService
       Config.setTileSize(Integer.parseInt(value));
     } else if (key.equals(SettingsActivity.GAP_PREF)) {
       Config.setTilePadding(Integer.parseInt(value));
+    } else if (key.equals(SettingsActivity.SHADING_PREF)) {
+      Config.setShading(Boolean.parseBoolean(value));
+    } else if (key.equals(SettingsActivity.HIGHLIGHT_PREF)) {
+      Config.setHighlighting(Boolean.parseBoolean(value));
     } else if (key.equals(SettingsActivity.BASE_COLOUR_PREF)) {
       Config.setBaseColour(parseColour(value));
     } else if (key.equals(SettingsActivity.FEAT_COLOUR_PREF_1)) {
@@ -172,14 +187,19 @@ public class HextileService extends GLWallpaperService
     class RenderTask extends AsyncTask<Void, Void, Void>
     {
       long FRAME_DELAY = 40;
+      long MAX_FRAME_SLEEP = 25;
 
       @Override
       protected Void doInBackground(Void... arg0)
       {
+        int frame = 0;
         Log.v(TAG, "RenderTask starting");
+        HextileEngine.this.renderer.initial();
+        
         while (!this.isCancelled())
         {
-          if (HextileEngine.this.renderer.step())
+          if (HextileEngine.this.renderer.step() ||
+              frame++ % MAX_FRAME_SLEEP == 0)
             HextileEngine.this.requestRender();
           
           try

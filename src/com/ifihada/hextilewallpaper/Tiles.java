@@ -33,6 +33,8 @@ class Tiles
   {
     Log.v(TAG, "Tiles sync'd");
     this.geom = new HexGeom(Config.getTileSize());
+    this.geom.setShading(Config.getShading());
+    this.geom.setHighlighting(Config.getHighlighting());
     this.pad = Config.getTilePadding();
     this.padh = this.pad * Const.sin60;
     this.dirty = true;
