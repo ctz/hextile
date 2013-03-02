@@ -109,7 +109,6 @@ public class HextileService extends GLWallpaperService
       super();
 
       this.renderer = new HextileRenderer(this);
-      this.setEGLConfigChooser(8, 8, 8, 8, 0, 0);
       this.setRenderer(this.renderer);
       this.setRenderMode(RENDERMODE_WHEN_DIRTY);
       this.setTouchEventsEnabled(true);
