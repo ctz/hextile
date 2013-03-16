@@ -24,7 +24,9 @@ public class SettingsActivity extends PreferenceActivity
   public static final String GAP_PREF = "gap";
   public static final String HIGHLIGHT_PREF = "highlight";
   public static final String SHADING_PREF = "shading";
+  public static final String INVERTED_PREF = "inverted";
   public static final String BASE_COLOUR_PREF = "base_colour";
+  public static final String BACK_COLOUR_PREF = "back_colour";
   public static final String FEAT_COLOUR_PREF_1 = "feat_colour_1";
   public static final String FEAT_COLOUR_PREF_2 = "feat_colour_2";
   public static final String FEAT_COLOUR_PREF_3 = "feat_colour_3";
@@ -62,6 +64,8 @@ public class SettingsActivity extends PreferenceActivity
     bindPreferenceSummaryToValue(findPreference(GAP_PREF));
     bindPreferenceSummaryToValue(findPreference(SHADING_PREF));
     bindPreferenceSummaryToValue(findPreference(HIGHLIGHT_PREF));
+    bindPreferenceSummaryToValue(findPreference(INVERTED_PREF));
+    
     this.bindColourPrefs();
     this.updateResetButton();
     
@@ -106,8 +110,9 @@ public class SettingsActivity extends PreferenceActivity
         return true;
       }
     };
-    
+
     bindColourPreference(findPreference(BASE_COLOUR_PREF), bindPreferenceColour);
+    bindColourPreference(findPreference(BACK_COLOUR_PREF), bindPreferenceColour);
     bindColourPreference(findPreference(FEAT_COLOUR_PREF_1), bindPreferenceColour);
     bindColourPreference(findPreference(FEAT_COLOUR_PREF_2), bindPreferenceColour);
     bindColourPreference(findPreference(FEAT_COLOUR_PREF_3), bindPreferenceColour);
@@ -118,6 +123,7 @@ public class SettingsActivity extends PreferenceActivity
   private boolean coloursAreDefaults()
   {
     return Config.getBaseColour().equalsOrClose(Config.DEFAULT_BASE_COLOUR) &&
+        Config.getBackColour().equalsOrClose(Config.DEFAULT_BACK_COLOUR) &&
         Config.getFeatureColour(0).equalsOrClose(Config.DEFAULT_FEAT_COLOUR_1) &&
         Config.getFeatureColour(1).equalsOrClose(Config.DEFAULT_FEAT_COLOUR_2) &&
         Config.getFeatureColour(2).equalsOrClose(Config.DEFAULT_FEAT_COLOUR_3) &&
@@ -143,6 +149,7 @@ public class SettingsActivity extends PreferenceActivity
   private void resetColours()
   {
     setColour(BASE_COLOUR_PREF, Config.DEFAULT_BASE_COLOUR);
+    setColour(BACK_COLOUR_PREF, Config.DEFAULT_BACK_COLOUR);
     setColour(FEAT_COLOUR_PREF_1, Config.DEFAULT_FEAT_COLOUR_1);
     setColour(FEAT_COLOUR_PREF_2, Config.DEFAULT_FEAT_COLOUR_2);
     setColour(FEAT_COLOUR_PREF_3, Config.DEFAULT_FEAT_COLOUR_3);

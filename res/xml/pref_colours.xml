@@ -5,6 +5,11 @@
         android:title="@string/pref_title_base_colour" />
     
     <yuku.ambilwarna.widget.AmbilWarnaPreference
+        android:key="back_colour"
+        android:defaultValue="0xff000000"
+        android:title="@string/pref_title_back_colour" />
+    
+    <yuku.ambilwarna.widget.AmbilWarnaPreference
         android:key="feat_colour_1"
         android:defaultValue="0xff33b5e5"
         android:title="@string/pref_title_feat_colour_1" />

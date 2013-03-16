@@ -33,6 +33,7 @@ public class HextileService extends GLWallpaperService
     HextileService.readStrSetting(ctx, SettingsActivity.GAP_PREF);
     HextileService.readBooleanSetting(ctx, SettingsActivity.HIGHLIGHT_PREF);
     HextileService.readBooleanSetting(ctx, SettingsActivity.SHADING_PREF);
+    HextileService.readBooleanSetting(ctx, SettingsActivity.INVERTED_PREF);
     HextileService.readIntSetting(ctx, SettingsActivity.BASE_COLOUR_PREF);
     HextileService.readIntSetting(ctx, SettingsActivity.FEAT_COLOUR_PREF_1);
     HextileService.readIntSetting(ctx, SettingsActivity.FEAT_COLOUR_PREF_2);
@@ -78,8 +79,12 @@ public class HextileService extends GLWallpaperService
       Config.setShading(Boolean.parseBoolean(value));
     } else if (key.equals(SettingsActivity.HIGHLIGHT_PREF)) {
       Config.setHighlighting(Boolean.parseBoolean(value));
+    } else if (key.equals(SettingsActivity.INVERTED_PREF)) {
+      Config.setInverted(Boolean.parseBoolean(value));
     } else if (key.equals(SettingsActivity.BASE_COLOUR_PREF)) {
       Config.setBaseColour(parseColour(value));
+    } else if (key.equals(SettingsActivity.BACK_COLOUR_PREF)) {
+      Config.setBackColour(parseColour(value));
     } else if (key.equals(SettingsActivity.FEAT_COLOUR_PREF_1)) {
       Config.setFeatureColour(0, parseColour(value));
     } else if (key.equals(SettingsActivity.FEAT_COLOUR_PREF_2)) {

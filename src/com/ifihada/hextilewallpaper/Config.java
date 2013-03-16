@@ -9,9 +9,11 @@ public class Config
   private static int tilePadding = 3;
   private static boolean shading = true;
   private static boolean highlighting = true;
+  private static boolean inverted = false;
   
   // Colours here are RGBA
   public final static Colour DEFAULT_BASE_COLOUR = Colour.fromRGBA(0x333344ff);
+  public final static Colour DEFAULT_BACK_COLOUR = Colour.fromRGBA(0x000000ff);
   public final static Colour DEFAULT_FEAT_COLOUR_1 = Colour.fromRGBA(0x33b5e5ff);
   public final static Colour DEFAULT_FEAT_COLOUR_2 = Colour.fromRGBA(0xaa66ccff);
   public final static Colour DEFAULT_FEAT_COLOUR_3 = Colour.fromRGBA(0x99cc00ff);
@@ -26,8 +28,9 @@ public class Config
    DEFAULT_FEAT_COLOUR_4,
    DEFAULT_FEAT_COLOUR_5,
   };
-  
+
   private static Colour baseColour = DEFAULT_BASE_COLOUR;
+  private static Colour backColour = DEFAULT_BACK_COLOUR;
   
   public final static int featureColourCount = Config.featureColours.length;
 
@@ -64,6 +67,17 @@ public class Config
     return Config.baseColour;
   }
   
+  public static void setBackColour(Colour c)
+  {
+    if (c.isValid())
+      Config.backColour = c;
+  }
+  
+  public static Colour getBackColour()
+  {
+    return Config.backColour;
+  }
+  
   public static void setFeatureColour(int i, Colour c)
   {
     if (i >= 0 && i < Config.featureColours.length && c.isValid())
@@ -96,5 +110,15 @@ public class Config
   public static void setHighlighting(boolean onoff)
   {
     Config.highlighting = onoff;
+  }
+  
+  public static boolean getInverted()
+  {
+    return Config.inverted;
+  }
+  
+  public static void setInverted(boolean onoff)
+  {
+    Config.inverted = onoff;
   }
 }

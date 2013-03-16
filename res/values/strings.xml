@@ -16,8 +16,10 @@
     
     <string name="pref_title_highlights">Tile highlights</string>
     <string name="pref_title_shading">Tile shading</string>
+    <string name="pref_title_invert">Color gap only</string>
     
     <string name="pref_title_base_colour">Base color</string>
+    <string name="pref_title_back_colour">Background color</string>
     <string name="pref_title_feat_colour_1">Touch color 1</string>
     <string name="pref_title_feat_colour_2">Touch color 2</string>
     <string name="pref_title_feat_colour_3">Touch color 3</string>

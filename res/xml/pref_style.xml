@@ -6,5 +6,8 @@
 	<CheckBoxPreference android:title="@string/pref_title_shading"
 		android:summaryOff="@string/pref_no" android:summaryOn="@string/pref_yes"
 		android:key="shading" android:defaultValue="true"/>
+	<CheckBoxPreference android:title="@string/pref_title_invert"
+		android:summaryOff="@string/pref_no" android:summaryOn="@string/pref_yes"
+		android:key="inverted" android:defaultValue="false"/>
 
 </PreferenceScreen>

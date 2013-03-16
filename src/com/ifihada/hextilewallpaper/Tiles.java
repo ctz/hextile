@@ -9,9 +9,12 @@ import android.util.Log;
 class Tiles
 {
   static final String TAG = "Tiles";
-  HexGeom geom = new HexGeom(50f);
+  HexGeom geom;
+  HexGeom outerGeom;
   int width, height;
   boolean dirty;
+  
+  boolean invertedLayout;
 
   float pad;
   float padh;
@@ -25,18 +28,36 @@ class Tiles
 
   Tiles(int w, int h)
   {
-    this.resize(w, h);
     this.sync();
+    this.resize(w, h);
   }
 
   public void sync()
   {
     Log.v(TAG, "Tiles sync'd");
-    this.geom = new HexGeom(Config.getTileSize());
-    this.geom.setShading(Config.getShading());
-    this.geom.setHighlighting(Config.getHighlighting());
+    int tileSize = Config.getTileSize();
     this.pad = Config.getTilePadding();
     this.padh = this.pad * Const.sin60;
+    
+    this.geom = new HexGeom(tileSize);
+    this.geom.setShading(Config.getShading());
+    this.geom.setHighlighting(Config.getHighlighting());
+    
+    this.invertedLayout = Config.getInverted();
+    
+    if (this.invertedLayout)
+    {
+      // make padding more obvious
+      this.pad = (this.pad + 1f) * 2;
+      this.padh = this.pad * Const.sin60;
+      
+      this.outerGeom = new HexGeom(tileSize + this.pad * 0.666f);
+      this.outerGeom.setShading(false);
+      this.outerGeom.setHighlighting(false);
+    } else {
+      this.outerGeom = null;
+    }
+    
     this.dirty = true;
   }
 
@@ -62,7 +83,7 @@ class Tiles
     }
     
     Colour[][] newcolours = new Colour[xmax + 1][ymax + 1];
-    Colour base = Config.getBaseColour();
+    Colour base = this.getBaseColour();
     
     for (Colour[] column : newcolours)
     {
@@ -110,7 +131,7 @@ class Tiles
 
           /* low, hi, step */
           float hy = height + geom.d;
-          float sy = geom.h + padh;
+          float sy = geom.h + pad / 2;
           float ly = lowBound(height, sy);
 
           float hx = width + geom.d;
@@ -187,14 +208,12 @@ class Tiles
     };
   }
   
-  static Colour BLACK = Colour.fromRGBA(0x00000000);
-  
   Colour getColour(int x, int y)
   {
     if (this.colours == null ||
         x >= this.colours.length ||
         y >= this.colours[x].length)
-      return BLACK;
+      return Colour.BLACK;
     else
       return this.colours[x][y];
   }
@@ -230,12 +249,20 @@ class Tiles
     return validPosition(t.ix, t.iy);
   }
   
+  private Colour getBaseColour()
+  {
+    if (this.invertedLayout)
+      return Config.getBackColour();
+    else
+      return Config.getBaseColour();
+  }
+  
   boolean stepCell(TilePosition t)
   {
     if (!this.validPosition(t))
       return false;
     
-    if (this.colours[t.ix][t.iy].lerpRGB(Config.getBaseColour(), 0.01f))
+    if (this.colours[t.ix][t.iy].lerpRGB(this.getBaseColour(), 0.01f))
     {
       spread(t);
       return true;
@@ -244,11 +271,38 @@ class Tiles
     }
   }
   
-  void render(GL10 gl)
+  private void renderStandard(GL10 gl)
   {
     for (TilePosition t : this.eachTile())
     {
       this.geom.draw(gl, t);
+    }
+  }
+  
+  private void renderInverted(GL10 gl)
+  {
+    // render backgrounds
+    for (TilePosition t : this.eachTile())
+    {
+      this.outerGeom.draw(gl, t);
+    }
+    
+    // render foregrounds
+    Colour c = Config.getBaseColour();
+    for (TilePosition t : this.eachTile())
+    {
+      t.colour = c; 
+      this.geom.draw(gl, t);
+    }
+  }
+  
+  void render(GL10 gl)
+  {
+    if (this.invertedLayout)
+    {
+      this.renderInverted(gl);
+    } else {
+      this.renderStandard(gl);
     }
   }
   

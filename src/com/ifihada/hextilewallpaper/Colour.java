@@ -6,6 +6,8 @@ public class Colour
 {
   float r, g, b, a;
   
+  public final static Colour BLACK = Colour.fromRGBA(0x000000ff);
+  
   public Colour()
   {
     this(0);

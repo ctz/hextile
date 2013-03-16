@@ -40,7 +40,8 @@ public class HextileRenderer implements GLWallpaperService.Renderer
   @Override
   public void onDrawFrame(GL10 gl)
   {
-    gl.glClearColor(0.f, 0.f, 0.f, 1.0f);
+    Colour back = Config.getBackColour();
+    gl.glClearColor(back.r, back.g, back.b, back.a);
     gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
     synchronized (this)
