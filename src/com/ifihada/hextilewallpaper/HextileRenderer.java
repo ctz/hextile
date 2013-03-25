@@ -8,6 +8,7 @@ import net.rbgrn.android.glwallpaperservice.*;
 public class HextileRenderer implements GLWallpaperService.Renderer
 {
   Tiles tiles = new Tiles();
+  Object sync = new Object();
   
   public HextileRenderer(GLWallpaperService.GLEngine engine)
   {
@@ -15,7 +16,7 @@ public class HextileRenderer implements GLWallpaperService.Renderer
   
   public void sync()
   {
-    synchronized (this)
+    synchronized (sync)
     {
       this.tiles.sync();
     }
@@ -23,7 +24,7 @@ public class HextileRenderer implements GLWallpaperService.Renderer
   
   public void initial()
   {
-    synchronized (this)
+    synchronized (sync)
     {
       this.tiles.dirty = true;
     }
@@ -31,7 +32,7 @@ public class HextileRenderer implements GLWallpaperService.Renderer
   
   public boolean step()
   {
-    synchronized (this)
+    synchronized (sync)
     {
       return this.tiles.step();
     }
@@ -44,7 +45,7 @@ public class HextileRenderer implements GLWallpaperService.Renderer
     gl.glClearColor(back.r, back.g, back.b, back.a);
     gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
-    synchronized (this)
+    synchronized (sync)
     {
       this.tiles.render(gl);
     }
@@ -53,7 +54,7 @@ public class HextileRenderer implements GLWallpaperService.Renderer
   @Override
   public void onSurfaceChanged(GL10 gl, int w, int h)
   {
-    synchronized (this)
+    synchronized (sync)
     {
       this.tiles.resize(w, h);
     }

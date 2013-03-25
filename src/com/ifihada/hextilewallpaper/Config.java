@@ -7,6 +7,7 @@ public class Config
   private static final String TAG = "Config";
   private static int tileSize = 60;
   private static int tilePadding = 3;
+  private static boolean scrolling = false;
   private static boolean shading = true;
   private static boolean highlighting = true;
   private static boolean inverted = false;
@@ -120,5 +121,15 @@ public class Config
   public static void setInverted(boolean onoff)
   {
     Config.inverted = onoff;
+  }
+  
+  public static boolean getScrolling()
+  {
+    return Config.scrolling;
+  }
+  
+  public static void setScrolling(boolean onoff)
+  {
+    Config.scrolling = onoff;
   }
 }
