@@ -4,11 +4,9 @@ import java.util.WeakHashMap;
 
 import com.ifihada.hextilewallpaper.prefs.SettingsActivity;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -33,7 +31,6 @@ public class HextileService extends GLWallpaperService
   {
     HextileService.readStrSetting(ctx, SettingsActivity.SIZE_PREF);
     HextileService.readStrSetting(ctx, SettingsActivity.GAP_PREF);
-    HextileService.readBooleanSetting(ctx, SettingsActivity.SCROLL_PREF);
     HextileService.readBooleanSetting(ctx, SettingsActivity.HIGHLIGHT_PREF);
     HextileService.readBooleanSetting(ctx, SettingsActivity.SHADING_PREF);
     HextileService.readBooleanSetting(ctx, SettingsActivity.INVERTED_PREF);
@@ -80,8 +77,6 @@ public class HextileService extends GLWallpaperService
       Config.setTilePadding(Integer.parseInt(value));
     } else if (key.equals(SettingsActivity.SHADING_PREF)) {
       Config.setShading(Boolean.parseBoolean(value));
-    } else if (key.equals(SettingsActivity.SCROLL_PREF)) {
-      Config.setScrolling(Boolean.parseBoolean(value));
     } else if (key.equals(SettingsActivity.HIGHLIGHT_PREF)) {
       Config.setHighlighting(Boolean.parseBoolean(value));
     } else if (key.equals(SettingsActivity.INVERTED_PREF)) {
@@ -143,15 +138,6 @@ public class HextileService extends GLWallpaperService
     public void sync()
     {
       this.renderer.sync();
-      
-      this.setScrollEvents(Config.getScrolling());
-    }
-    
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
-    private void setScrollEvents(boolean onoff)
-    {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
-        this.setOffsetNotificationsEnabled(onoff);
     }
     
     int selectedColour = 0;
@@ -183,12 +169,6 @@ public class HextileService extends GLWallpaperService
         this.start();
       else
         this.pause();
-    }
-    
-    @Override
-    public void onOffsetsChanged(float xoffs, float yoffs, float xstep, float ystep, int xpxoffs, int ypxoffs)
-    {
-      this.renderer.tiles.slide(xoffs, yoffs);
     }
     
     private synchronized void start()

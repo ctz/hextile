@@ -14,9 +14,6 @@ class Tiles
   int width, height;
   boolean dirty;
   
-  static final int scrollableTiles = 10;
-  
-  boolean scrolling;
   boolean invertedLayout;
 
   float pad;
@@ -42,8 +39,6 @@ class Tiles
     this.pad = Config.getTilePadding();
     this.padh = this.pad * Const.sin60;
     
-    this.scrolling = Config.getScrolling();
-    
     this.geom = new HexGeom(tileSize);
     this.geom.setShading(Config.getShading());
     this.geom.setHighlighting(Config.getHighlighting());
@@ -64,7 +59,6 @@ class Tiles
     }
     
     this.dirty = true;
-    this.onResize();
   }
 
   void resize(int w, int h)
@@ -86,12 +80,6 @@ class Tiles
         xmax = t.ix;
       if (t.iy > ymax)
         ymax = t.iy;
-    }
-    
-    if (this.scrolling)
-    {
-      xmax += Tiles.scrollableTiles;
-      ymax += Tiles.scrollableTiles;
     }
     
     Colour[][] newcolours = new Colour[xmax + 1][ymax + 1];
@@ -128,7 +116,7 @@ class Tiles
     n += 2;
     return w2 - s * n;
   }
-  
+
   Iterable<TilePosition> eachTile()
   {
     return new Iterable<TilePosition>()
@@ -140,27 +128,15 @@ class Tiles
         {
           TilePosition p = new TilePosition();
           boolean first = true;
-          
-          float slop = Tiles.scrollableTiles * geom.d;
 
-          /* step */
+          /* low, hi, step */
+          float hy = height + geom.d;
           float sy = geom.h + pad / 2;
-          
-          /* offset, index */
-          float oy = (slideY * slop) % sy;
-          int iy = (int) ((slideY * slop) / sy);
-          
-          /* low, hi */
-          float hy = height + geom.d - oy;
-          float ly = lowBound(height, sy) - oy;
+          float ly = lowBound(height, sy);
 
+          float hx = width + geom.d;
           float sx = geom.d + geom.r + pad * 2;
-          
-          float ox = (slideX * slop) % sx;
-          int ix = (int) ((slideX * slop) / sx);
-          
-          float hx = width + geom.d - ox;
-          float lx = lowBound(width, sx) - ox;
+          float lx = lowBound(width, sx);
 
           @Override
           public boolean hasNext()
@@ -182,12 +158,12 @@ class Tiles
             
             if (this.first)
             {
-              this.p.ix = this.ix;
-              this.p.iy = this.iy;
+              this.p.ix = 0;
+              this.p.iy = 0;
               this.p.x = this.lx;
               this.p.y = this.ly;
               this.p.oddRow = false;
-              this.p.colour = getColour(this.p.ix, this.p.iy);
+              this.p.colour = getColour(0, 0);
               this.p.updateAdjacent();
               this.first = false;
               return this.p;
@@ -211,7 +187,7 @@ class Tiles
             
             if (this.p.x > this.hx)
             {
-              this.p.ix = this.ix;
+              this.p.ix = 0;
               this.p.iy += 1;
               this.p.x = this.lx;
               this.p.y += this.sy;
@@ -237,7 +213,7 @@ class Tiles
     if (this.colours == null ||
         x >= this.colours.length ||
         y >= this.colours[x].length)
-      return Config.getBaseColour();
+      return Colour.BLACK;
     else
       return this.colours[x][y];
   }
@@ -302,7 +278,7 @@ class Tiles
       this.geom.draw(gl, t);
     }
   }
-    
+  
   private void renderInverted(GL10 gl)
   {
     // render backgrounds
@@ -315,7 +291,7 @@ class Tiles
     Colour c = Config.getBaseColour();
     for (TilePosition t : this.eachTile())
     {
-      t.colour = c;
+      t.colour = c; 
       this.geom.draw(gl, t);
     }
   }
@@ -369,24 +345,9 @@ class Tiles
     return false;
   }
 
-  private void pointTouched(int x, int y, int colour)
-  {
-    if (x < this.colours.length && y < this.colours[x].length)
-      this.colours[x][y].set(Config.getFeatureColour(colour));
-  }
-  
-  float slideX, slideY;
-
-  void slide(float xoffs, float yoffs)
-  {
-    if (this.scrolling)
-    {
-      this.slideX = xoffs;
-      this.slideY = yoffs;
-      this.dirty = true;
-    } else {
-      this.slideX = 0.5f;
-      this.slideY = 0.5f;
-    }
+  private boolean pointTouched(int x, int y, int colour)
+  {    
+    this.colours[x][y].set(Config.getFeatureColour(colour));
+    return true;
   }
 }

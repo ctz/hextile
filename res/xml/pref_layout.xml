@@ -16,8 +16,4 @@
         android:negativeButtonText="@null"
         android:positiveButtonText="@null"
         android:title="@string/pref_title_gap" />
-    
-	<CheckBoxPreference android:title="@string/pref_title_scroll"
-		android:summaryOff="@string/pref_no" android:summaryOn="@string/pref_yes"
-		android:key="scroll" android:defaultValue="false"/>
 </PreferenceScreen>

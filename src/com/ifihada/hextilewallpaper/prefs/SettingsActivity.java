@@ -22,7 +22,6 @@ public class SettingsActivity extends PreferenceActivity
 {
   public static final String SIZE_PREF = "size";
   public static final String GAP_PREF = "gap";
-  public static final String SCROLL_PREF = "scroll";
   public static final String HIGHLIGHT_PREF = "highlight";
   public static final String SHADING_PREF = "shading";
   public static final String INVERTED_PREF = "inverted";
@@ -63,7 +62,6 @@ public class SettingsActivity extends PreferenceActivity
 
     bindPreferenceSummaryToValue(findPreference(SIZE_PREF));
     bindPreferenceSummaryToValue(findPreference(GAP_PREF));
-    bindPreferenceSummaryToValue(findPreference(SCROLL_PREF));
     bindPreferenceSummaryToValue(findPreference(SHADING_PREF));
     bindPreferenceSummaryToValue(findPreference(HIGHLIGHT_PREF));
     bindPreferenceSummaryToValue(findPreference(INVERTED_PREF));
