@@ -122,7 +122,7 @@ public class HextileService extends GLWallpaperService
   class HextileEngine extends GLEngine
   {
     static final String TAG = "HextileEngine";
-    HextileRenderer renderer;
+    private HextileRenderer renderer;
     
     public HextileEngine()
     {
@@ -149,7 +149,7 @@ public class HextileService extends GLWallpaperService
     {
       for (int p = 0; p < ev.getPointerCount(); p++)
       {
-        this.renderer.tiles.handleTouch(ev.getX(p), ev.getY(p), this.selectedColour);
+        this.renderer.handleTouch(ev.getX(p), ev.getY(p), this.selectedColour);
       }
       
       if (ev.getAction() == MotionEvent.ACTION_UP)

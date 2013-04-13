@@ -296,7 +296,7 @@ class Tiles
     }
   }
   
-  void render(GL10 gl)
+  public void render(GL10 gl)
   {
     if (this.invertedLayout)
     {
@@ -306,7 +306,7 @@ class Tiles
     }
   }
   
-  boolean step()
+  public boolean step()
   {
     boolean changed = false;
     
@@ -330,7 +330,7 @@ class Tiles
     return changed;
   }
 
-  boolean handleTouch(float touchx, float touchy, int colour)
+  public boolean handleTouch(float touchx, float touchy, int colour)
   {
     for (TilePosition t : this.eachTile())
     {

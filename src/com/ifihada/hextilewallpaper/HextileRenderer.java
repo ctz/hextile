@@ -7,7 +7,7 @@ import net.rbgrn.android.glwallpaperservice.*;
 
 public class HextileRenderer implements GLWallpaperService.Renderer
 {
-  Tiles tiles = new Tiles();
+  private Tiles tiles = new Tiles();
   
   public HextileRenderer(GLWallpaperService.GLEngine engine)
   {
@@ -81,5 +81,13 @@ public class HextileRenderer implements GLWallpaperService.Renderer
   
   public void release()
   {
+  }
+
+  public void handleTouch(float x, float y, int selectedColour)
+  {
+    synchronized (this)
+    {
+      this.tiles.handleTouch(x, y, selectedColour);
+    }
   }
 }
