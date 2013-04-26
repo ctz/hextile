@@ -377,8 +377,7 @@ public class Tiles
 
   public boolean handleTouch(float touchx, float touchy, int colour)
   {
-    //touchIterator.reset(touchx, touchy);
-    touchIterator.reset();
+    touchIterator.reset(touchx, touchy);
     
     while (touchIterator.hasNext())
     {

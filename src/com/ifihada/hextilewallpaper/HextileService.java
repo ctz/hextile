@@ -20,6 +20,8 @@ public class HextileService extends GLWallpaperService
   @Override
   public Engine onCreateEngine()
   {
+    //android.os.Debug.waitForDebugger();
+    
     HextileService.readSettings(this);
     HextileEngine e = new HextileEngine();
     
@@ -144,32 +146,63 @@ public class HextileService extends GLWallpaperService
     boolean isVisible = true;
     RenderTask renderTask = null;
     
+    
+    static final int MAX_POINTERS = 8;
+    private boolean down[] = new boolean[MAX_POINTERS];
+    private float lastX[] = new float[MAX_POINTERS];
+    private float lastY[] = new float[MAX_POINTERS];
+    
+    static final float infillThreshold = 75f;
+    
+    private void nextPoint(float x, float y, int pointer)
+    {
+      // for large distances between points during a swipe, synthesise extra points
+      if (pointer < MAX_POINTERS)
+      {
+        if (this.down[pointer])
+        {
+          float diffX = this.lastX[pointer] - x;
+          float diffY = this.lastY[pointer] - y;
+          float diff = Math.abs((float) Math.hypot(diffX, diffY));
+          
+          int infills = (int) (diff / infillThreshold);
+          float step = 1 / (float) (infills + 1);
+          
+          for (int i = 1; i <= infills; i++)
+          {
+            this.renderer.handleTouchInfill(x + (step * i) * diffX, y + (step * i) * diffY, this.selectedColour);
+          }
+        }
+        
+        this.lastX[pointer] = x;
+        this.lastY[pointer] = y;
+      }
+      
+      this.renderer.handleTouch(x, y, this.selectedColour);
+    }
+    
     private void onTouchUp(MotionEvent ev)
     {
       this.selectedColour++;
       this.selectedColour %= Config.featureColourCount;
+      
+      for (int p = 0; p < ev.getPointerCount(); p++)
+        this.down[p] = false;
     }
     
     private void onTouchMove(MotionEvent ev)
     {
-      for (int h = 0; h < ev.getHistorySize(); h++)
-      {
-        for (int p = 0; p < ev.getPointerCount(); p++)
-        {
-          float x = ev.getHistoricalX(p, h);
-          float y = ev.getHistoricalY(p, h);
-          this.renderer.handleTouch(x, y, this.selectedColour);
-        }
-      }
-      
-      // process current position too
-      this.onTouchDown(ev);
+      for (int p = 0; p < ev.getPointerCount(); p++)
+        this.nextPoint(ev.getX(p), ev.getY(p), p);
     }
     
     private void onTouchDown(MotionEvent ev)
     {
       for (int p = 0; p < ev.getPointerCount(); p++)
-        this.renderer.handleTouch(ev.getX(p), ev.getY(p), this.selectedColour);
+      {
+        this.nextPoint(ev.getX(p), ev.getY(p), p);
+        this.down[p] = true;
+      }
     }
     
     @Override
@@ -186,6 +219,7 @@ public class HextileService extends GLWallpaperService
         break;
         
       case MotionEvent.ACTION_DOWN:
+        this.renderer.resetDebugTrace();
         this.onTouchDown(ev);
         break;
       }
