@@ -20,6 +20,11 @@ class TilePosition
 
   TilePosition()
   {
+    this.reset();
+  }
+  
+  void reset()
+  {
     this.x = 0f;
     this.y = 0f;
     this.cx = 0f;
@@ -28,7 +33,7 @@ class TilePosition
     this.a1x = this.a1y = this.a2x = this.a2y = 0;
     this.a3x = this.a3y = this.a4x = this.a4y = 0;
     this.oddRow = false;
-    this.colour = Colour.fromRGBA(0xff0000ff);
+    this.colour = Colour.BLACK;
   }
   
   @SuppressLint("DefaultLocale")

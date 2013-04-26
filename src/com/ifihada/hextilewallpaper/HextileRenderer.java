@@ -3,20 +3,25 @@ package com.ifihada.hextilewallpaper;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import com.ifihada.hextilewallpaper.periodic.PeriodicManager;
+
 import net.rbgrn.android.glwallpaperservice.*;
 
 public class HextileRenderer implements GLWallpaperService.Renderer
 {
   private Tiles tiles = new Tiles();
+  private PeriodicManager periodic = new PeriodicManager();
   
   public HextileRenderer(GLWallpaperService.GLEngine engine)
   {
+    this.sync();
   }
   
   public void sync()
   {
     synchronized (this)
     {
+      this.periodic.sync();
       this.tiles.sync();
     }
   }
@@ -25,6 +30,7 @@ public class HextileRenderer implements GLWallpaperService.Renderer
   {
     synchronized (this)
     {
+      this.periodic.start();
       this.tiles.dirty = true;
     }
   }
@@ -33,6 +39,7 @@ public class HextileRenderer implements GLWallpaperService.Renderer
   {
     synchronized (this)
     {
+      this.periodic.step(this.tiles);
       return this.tiles.step();
     }
   }

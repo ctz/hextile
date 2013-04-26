@@ -10,6 +10,7 @@ public class Config
   private static boolean shading = true;
   private static boolean highlighting = true;
   private static boolean inverted = false;
+  private static String periodics = "all";
   
   // Colours here are RGBA
   public final static Colour DEFAULT_BASE_COLOUR = Colour.fromRGBA(0x333344ff);
@@ -120,5 +121,15 @@ public class Config
   public static void setInverted(boolean onoff)
   {
     Config.inverted = onoff;
+  }
+
+  public static String getPeriodics()
+  {
+    return periodics;
+  }
+
+  public static void setPeriodics(String periodics)
+  {
+    Config.periodics = periodics;
   }
 }

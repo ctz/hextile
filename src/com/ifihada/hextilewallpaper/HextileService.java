@@ -144,18 +144,50 @@ public class HextileService extends GLWallpaperService
     boolean isVisible = true;
     RenderTask renderTask = null;
     
+    private void onTouchUp(MotionEvent ev)
+    {
+      this.selectedColour++;
+      this.selectedColour %= Config.featureColourCount;
+    }
+    
+    private void onTouchMove(MotionEvent ev)
+    {
+      for (int h = 0; h < ev.getHistorySize(); h++)
+      {
+        for (int p = 0; p < ev.getPointerCount(); p++)
+        {
+          float x = ev.getHistoricalX(p, h);
+          float y = ev.getHistoricalY(p, h);
+          this.renderer.handleTouch(x, y, this.selectedColour);
+        }
+      }
+      
+      // process current position too
+      this.onTouchDown(ev);
+    }
+    
+    private void onTouchDown(MotionEvent ev)
+    {
+      for (int p = 0; p < ev.getPointerCount(); p++)
+        this.renderer.handleTouch(ev.getX(p), ev.getY(p), this.selectedColour);
+    }
+    
     @Override
     public void onTouchEvent(MotionEvent ev)
     {
-      for (int p = 0; p < ev.getPointerCount(); p++)
+      switch (ev.getAction())
       {
-        this.renderer.handleTouch(ev.getX(p), ev.getY(p), this.selectedColour);
-      }
-      
-      if (ev.getAction() == MotionEvent.ACTION_UP)
-      {
-        this.selectedColour++;
-        this.selectedColour %= Config.featureColourCount;
+      case MotionEvent.ACTION_UP:
+        this.onTouchUp(ev);
+        break;
+        
+      case MotionEvent.ACTION_MOVE:
+        this.onTouchMove(ev);
+        break;
+        
+      case MotionEvent.ACTION_DOWN:
+        this.onTouchDown(ev);
+        break;
       }
     }
     

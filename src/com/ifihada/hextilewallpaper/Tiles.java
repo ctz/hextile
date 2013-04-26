@@ -6,18 +6,20 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.util.Log;
 
-class Tiles
+public class Tiles
 {
   static final String TAG = "Tiles";
   HexGeom geom;
   HexGeom outerGeom;
-  int width, height;
   boolean dirty;
   
   boolean invertedLayout;
 
   float pad;
   float padh;
+
+  public int width, height;
+  public int maxX, maxY;
 
   Colour[][] colours;
   
@@ -74,8 +76,13 @@ class Tiles
   {
     int xmax = 0, ymax = 0;
     
-    for (TilePosition t : this.eachTile())
+    TileIterator it = new TileIterator();
+    it.reset();
+    
+    while (it.hasNext())
     {
+      TilePosition t = it.next();
+      
       if (t.ix > xmax)
         xmax = t.ix;
       if (t.iy > ymax)
@@ -107,6 +114,9 @@ class Tiles
     }
     
     this.colours = newcolours;
+    this.maxX = xmax + 1;
+    this.maxY = ymax + 1;
+    Log.v(TAG, "onResize() completed");
   }
   
   float lowBound(int w, float s)
@@ -116,96 +126,113 @@ class Tiles
     n += 2;
     return w2 - s * n;
   }
-
-  Iterable<TilePosition> eachTile()
+  
+  class TileIterator implements Iterator<TilePosition>
   {
-    return new Iterable<TilePosition>()
+    TilePosition p = new TilePosition();
+
+    /* low, hi, step */
+    float hy, sy, ly;
+    float hx, sx, lx;
+    
+    void reset()
     {
-      @Override
-      public Iterator<TilePosition> iterator()
+      hy = height + geom.d;
+      sy = geom.h + pad / 2;
+      ly = lowBound(height, sy);
+      
+      hx = width + geom.d;
+      sx = geom.d + geom.r + pad * 2;
+      lx = lowBound(width, sx);
+      
+      p.reset();
+      selectStart();
+    }
+    
+    void reset(float tgtx, float tgty)
+    {
+      reset();
+      
+      int slop = 2;
+      float basex = tgtx - this.sx * slop;
+      float basey = tgty - this.sy * slop;
+      this.fastForward(basex, basey);
+      this.hy = tgty + this.sy * slop;
+    }
+    
+    private void selectStart()
+    {
+      this.p.ix = 0;
+      this.p.iy = 0;
+      this.p.x = this.lx;
+      this.p.y = this.ly;
+      this.p.oddRow = false;
+      this.p.colour = getColour(this.p.ix, this.p.iy);
+      this.p.updateAdjacent();
+    }
+    
+    private void fastForward(float ix, float iy)
+    {
+      while (this.hasNext())
       {
-        return new Iterator<TilePosition>()
-        {
-          TilePosition p = new TilePosition();
-          boolean first = true;
-
-          /* low, hi, step */
-          float hy = height + geom.d;
-          float sy = geom.h + pad / 2;
-          float ly = lowBound(height, sy);
-
-          float hx = width + geom.d;
-          float sx = geom.d + geom.r + pad * 2;
-          float lx = lowBound(width, sx);
-
-          @Override
-          public boolean hasNext()
-          {
-            return !this.atEnd();
-          }
-
-          private boolean atEnd()
-          {
-            return this.p.x + this.sx > this.hx
-                && this.p.y + this.sy > this.hy;
-          }
-
-          @Override
-          public TilePosition next()
-          {
-            if (this.atEnd())
-              throw new NoSuchElementException();
-            
-            if (this.first)
-            {
-              this.p.ix = 0;
-              this.p.iy = 0;
-              this.p.x = this.lx;
-              this.p.y = this.ly;
-              this.p.oddRow = false;
-              this.p.colour = getColour(0, 0);
-              this.p.updateAdjacent();
-              this.first = false;
-              return this.p;
-            }
-            
-            this.step();
-            return this.p;
-          }
-          
-          private void step()
-          {
-            this.p.ix += 1;
-            this.p.x += this.sx;
-            
-            if (this.p.oddRow)
-            {
-              this.p.cx = this.p.x + (geom.d + geom.r) / 2 + pad; 
-            } else {
-              this.p.cx = this.p.x;
-            }
-            
-            if (this.p.x > this.hx)
-            {
-              this.p.ix = 0;
-              this.p.iy += 1;
-              this.p.x = this.lx;
-              this.p.y += this.sy;
-              this.p.oddRow = !this.p.oddRow;
-            }
-
-            this.p.updateAdjacent();
-            this.p.colour = getColour(this.p.ix, this.p.iy);
-          }
-
-          @Override
-          public void remove()
-          {
-            throw new UnsupportedOperationException();
-          }
-        };
+        TilePosition t = this.next();
+        if (t.cx > ix && t.y > iy)
+          break;
       }
-    };
+    }
+
+    @Override
+    public boolean hasNext()
+    {
+      return !this.atEnd();
+    }
+
+    private boolean atEnd()
+    {
+      return this.p.x + this.sx > this.hx
+          && this.p.y + this.sy > this.hy;
+    }
+
+    @Override
+    public TilePosition next()
+    {
+      if (this.atEnd())
+        throw new NoSuchElementException();
+      
+      this.step();
+      return this.p;
+    }
+    
+    private void step()
+    {
+      this.p.ix += 1;
+      this.p.x += this.sx;
+      
+      if (this.p.oddRow)
+      {
+        this.p.cx = this.p.x + (geom.d + geom.r) / 2 + pad; 
+      } else {
+        this.p.cx = this.p.x;
+      }
+      
+      if (this.p.x > this.hx)
+      {
+        this.p.ix = 0;
+        this.p.iy += 1;
+        this.p.x = this.lx;
+        this.p.y += this.sy;
+        this.p.oddRow = !this.p.oddRow;
+      }
+
+      this.p.updateAdjacent();
+      this.p.colour = getColour(this.p.ix, this.p.iy);
+    }
+
+    @Override
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
   }
   
   Colour getColour(int x, int y)
@@ -217,6 +244,9 @@ class Tiles
     else
       return this.colours[x][y];
   }
+
+  static float BASE_LERP = 0.01f;
+  static float PROP_LERP = 0.025f;
   
   void propagate(int sx, int sy, int tx, int ty)
   {
@@ -227,7 +257,7 @@ class Tiles
         ty < 0 || ty >= this.colours[tx].length)
       return;
     
-    this.colours[tx][ty].lerpRGB(this.colours[sx][sy], 0.025f);
+    this.colours[tx][ty].lerpRGB(this.colours[sx][sy], PROP_LERP);
   }
   
   void spread(TilePosition t)
@@ -262,7 +292,7 @@ class Tiles
     if (!this.validPosition(t))
       return false;
     
-    if (this.colours[t.ix][t.iy].lerpRGB(this.getBaseColour(), 0.01f))
+    if (this.colours[t.ix][t.iy].lerpRGB(this.getBaseColour(), BASE_LERP))
     {
       spread(t);
       return true;
@@ -270,11 +300,17 @@ class Tiles
       return false;
     }
   }
+
+  private TileIterator renderIterator = new TileIterator();
+  private TileIterator stepIterator = new TileIterator();
   
   private void renderStandard(GL10 gl)
   {
-    for (TilePosition t : this.eachTile())
+    renderIterator.reset();
+    
+    while (renderIterator.hasNext())
     {
+      TilePosition t = renderIterator.next();
       this.geom.draw(gl, t);
     }
   }
@@ -282,16 +318,20 @@ class Tiles
   private void renderInverted(GL10 gl)
   {
     // render backgrounds
-    for (TilePosition t : this.eachTile())
+    renderIterator.reset();
+    while (renderIterator.hasNext())
     {
+      TilePosition t = renderIterator.next();
       this.outerGeom.draw(gl, t);
     }
     
     // render foregrounds
     Colour c = Config.getBaseColour();
-    for (TilePosition t : this.eachTile())
+    renderIterator.reset();
+    while (renderIterator.hasNext())
     {
-      t.colour = c; 
+      TilePosition t = renderIterator.next();
+      t.colour = c;
       this.geom.draw(gl, t);
     }
   }
@@ -312,9 +352,12 @@ class Tiles
     
     if (!this.dirty)
       return false;
-    
-    for (TilePosition t : this.eachTile())
+
+    stepIterator.reset();
+    while (stepIterator.hasNext())
     {
+      TilePosition t = stepIterator.next();
+      
       if (this.stepCell(t))
         changed = true;
     }
@@ -329,25 +372,37 @@ class Tiles
     
     return changed;
   }
+  
+  private TileIterator touchIterator = new TileIterator();
 
   public boolean handleTouch(float touchx, float touchy, int colour)
   {
-    for (TilePosition t : this.eachTile())
+    //touchIterator.reset(touchx, touchy);
+    touchIterator.reset();
+    
+    while (touchIterator.hasNext())
     {
+      TilePosition t = touchIterator.next();
+      
       if (this.geom.withinRadius(t.cx, t.y, touchx, touchy))
       {
         this.pointTouched(t.ix, t.iy, colour);
-        this.dirty = true;
-        return true;
+        break;
       }
     }
     
     return false;
   }
 
-  private boolean pointTouched(int x, int y, int colour)
-  {    
-    this.colours[x][y].set(Config.getFeatureColour(colour));
-    return true;
+  public void pointTouched(int x, int y, int colour)
+  {
+    if (x > 0 &&
+        y > 0 &&
+        x < this.colours.length &&
+        y < this.colours[x].length)
+    {
+      this.colours[x][y].set(Config.getFeatureColour(colour));
+      this.dirty = true;
+    }
   }
 }
