@@ -27,7 +27,6 @@ public class PeriodicManager
     this.selected.add(new RayLeftwards());
     this.selected.add(new RayRightwards());
     this.selected.add(new Dots());
-    this.selected.clear();
   }
   
   public void start()
