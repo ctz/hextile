@@ -4,31 +4,56 @@ import com.ifihada.hextilewallpaper.Tiles;
 
 public abstract class MovingRay implements IPeriodic
 {
-  int pos[] = new int[2];
+  float pos[] = new float[2];
   int currentColour;
-  
-  abstract void startPos(int pos[], Tiles t);
-  abstract void nextPos(int pos[]);
   
   static final int X = 0;
   static final int Y = 1;
-
+  
+  static final int RANDOM = -1;
+  static final int TOP_LEFT = 0;
+  static final int BOTTOM_RIGHT = 1;
+  
+  float deltaX;
+  float deltaY;
+  int startX;
+  int startY;
+  
+  public MovingRay(float dx, float dy, int startx, int starty)
+  {
+    this.deltaX = dx;
+    this.deltaY = dy;
+    this.startX = startx;
+    this.startY = starty;
+  }
+  
+  @Override
+  public void init(Tiles t)
+  {
+    if (this.startX == RANDOM)
+      this.pos[X] = PeriodicManager.randomX(t);
+    else
+      this.pos[X] = (float) this.startX * t.width;
+    
+    if (this.startY == RANDOM)
+      this.pos[Y] = PeriodicManager.randomY(t);
+    else
+      this.pos[Y] = (float) this.startY * t.height;
+    
+    this.currentColour = PeriodicManager.randomColour();
+  }
+  
   @Override
   public boolean step(Tiles t)
-  {
-    if (this.pos[X] == -1 && this.pos[Y] == -1)
-    {
-      this.startPos(this.pos, t);
-      this.currentColour = PeriodicManager.randomColour();
-      return false;
-    }
-    
-    this.nextPos(this.pos);
+  {    
+    int step = t.tileSize / 4;
+
+    this.pos[X] += step * this.deltaX;
+    this.pos[Y] += step * this.deltaY;
       
-    if (this.pos[Y] >= t.maxY || this.pos[Y] < 0 ||
-        this.pos[X] >= t.maxX || this.pos[X] < 0)
+    if (this.pos[Y] >= t.height || this.pos[Y] < 0 ||
+        this.pos[X] >= t.width || this.pos[X] < 0)
     {
-      this.reset();
       return true;
     }
     
@@ -38,13 +63,37 @@ public abstract class MovingRay implements IPeriodic
   @Override
   public void render(Tiles t)
   {
-    t.pointTouched(this.pos[X], this.pos[Y], this.currentColour);
+    t.handleTouch(this.pos[X], this.pos[Y], this.currentColour);
   }
+}
 
-  @Override
-  public void reset()
+class RayDownwards extends MovingRay
+{
+  public RayDownwards()
   {
-    this.pos[X] = -1;
-    this.pos[Y] = -1;
+    super(0f, 1f, RANDOM, TOP_LEFT);
+  }
+}
+
+class RayUpwards extends MovingRay
+{
+  public RayUpwards()
+  {
+    super(0f, -1f, RANDOM, BOTTOM_RIGHT);
+  }
+}
+
+class RayRightwards extends MovingRay
+{
+  public RayRightwards()
+  {
+    super(1f, 0f, TOP_LEFT, RANDOM);
+  }
+}
+class RayLeftwards extends MovingRay
+{
+  public RayLeftwards()
+  {
+    super(-1f, 0f, BOTTOM_RIGHT, RANDOM);
   }
 }

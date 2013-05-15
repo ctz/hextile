@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
-import android.util.Log;
-
 import com.ifihada.hextilewallpaper.Config;
 import com.ifihada.hextilewallpaper.Tiles;
 
@@ -31,8 +29,6 @@ public class PeriodicManager
   
   public void start()
   {
-    for (IPeriodic i : this.selected)
-      i.reset();
     this.actives.clear();
   }
   
@@ -40,7 +36,7 @@ public class PeriodicManager
   static final int CHOOSE_FRAMES = 64;
   int frame;
   
-  private void chooseNew()
+  private void chooseNew(Tiles t)
   {
     int nselected = this.selected.size();
     int tries = 5;
@@ -54,8 +50,7 @@ public class PeriodicManager
       IPeriodic chosen = this.selected.get(idx);
       if (this.actives.contains(chosen))
         continue;
-      Log.v(TAG, "chosen " + chosen.getName() + " : " + chosen.getDescription());
-      chosen.reset();
+      chosen.init(t);
       this.actives.add(chosen);
     }
   }
@@ -83,20 +78,20 @@ public class PeriodicManager
       i.render(t);
     
     if (this.frame % CHOOSE_FRAMES == 0)
-      this.chooseNew();
+      this.chooseNew(t);
   }
 
   static final int BORDER = 2;
   static Random rand = new Random();
   
-  static int randomX(Tiles t)
+  static float randomX(Tiles t)
   {
-    return BORDER + PeriodicManager.rand.nextInt(Math.max(BORDER, t.maxX - BORDER - BORDER));
+    return PeriodicManager.rand.nextFloat() * t.width;
   }
 
-  static int randomY(Tiles t)
+  static float randomY(Tiles t)
   {
-    return BORDER + PeriodicManager.rand.nextInt(Math.max(BORDER, t.maxY - BORDER - BORDER));
+    return PeriodicManager.rand.nextFloat() * t.height;
   }
   
   static int randomColour()

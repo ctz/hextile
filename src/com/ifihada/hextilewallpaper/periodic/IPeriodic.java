@@ -4,9 +4,8 @@ import com.ifihada.hextilewallpaper.Tiles;
 
 public interface IPeriodic
 {
-  public String getName();
-  public String getDescription();
-  public void reset();
+  // initialise everything afresh. must not store t.
+  public void init(Tiles t);
   
   // return true if current animation is done
   public boolean step(Tiles t);

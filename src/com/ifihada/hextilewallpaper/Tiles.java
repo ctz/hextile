@@ -17,6 +17,8 @@ public class Tiles
 
   float pad;
   float padh;
+  
+  public int tileSize;
 
   public int width, height;
   public int maxX, maxY;
@@ -37,11 +39,11 @@ public class Tiles
   public void sync()
   {
     Log.v(TAG, "Tiles sync'd");
-    int tileSize = Config.getTileSize();
+    this.tileSize = Config.getTileSize();
     this.pad = Config.getTilePadding();
     this.padh = this.pad * Const.sin60;
     
-    this.geom = new HexGeom(tileSize);
+    this.geom = new HexGeom(this.tileSize);
     this.geom.setShading(Config.getShading());
     this.geom.setHighlighting(Config.getHighlighting());
     
@@ -53,7 +55,7 @@ public class Tiles
       this.pad = (this.pad + 1f) * 2;
       this.padh = this.pad * Const.sin60;
       
-      this.outerGeom = new HexGeom(tileSize + this.pad * 0.666f);
+      this.outerGeom = new HexGeom(this.tileSize + this.pad * 0.666f);
       this.outerGeom.setShading(false);
       this.outerGeom.setHighlighting(false);
     } else {
@@ -375,7 +377,7 @@ public class Tiles
   
   private TileIterator touchIterator = new TileIterator();
 
-  public boolean handleTouch(float touchx, float touchy, int colour)
+  public synchronized boolean handleTouch(float touchx, float touchy, int colour)
   {
     touchIterator.reset(touchx, touchy);
     
@@ -386,7 +388,6 @@ public class Tiles
       if (this.geom.withinRadius(t.cx, t.y, touchx, touchy))
       {
         this.pointTouched(t.ix, t.iy, colour);
-        break;
       }
     }
     

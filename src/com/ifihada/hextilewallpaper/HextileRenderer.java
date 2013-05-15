@@ -14,9 +14,9 @@ import net.rbgrn.android.glwallpaperservice.*;
 public class HextileRenderer implements GLWallpaperService.Renderer
 {
   private Tiles tiles = new Tiles();
-  private PeriodicManager periodic = new PeriodicManager();
+  //private PeriodicManager periodic = new PeriodicManager();
   
-  static boolean DEBUG = false;
+  static boolean DEBUG = true;
   static int DEBUG_POINTS = 128;
   private FloatBuffer debugVertexBuffer;
   private int debugUsed;
@@ -44,7 +44,7 @@ public class HextileRenderer implements GLWallpaperService.Renderer
   {
     synchronized (this)
     {
-      this.periodic.sync();
+      //this.periodic.sync();
       this.tiles.sync();
     }
   }
@@ -53,7 +53,7 @@ public class HextileRenderer implements GLWallpaperService.Renderer
   {
     synchronized (this)
     {
-      this.periodic.start();
+      //this.periodic.start();
       this.tiles.dirty = true;
     }
   }
@@ -62,7 +62,7 @@ public class HextileRenderer implements GLWallpaperService.Renderer
   {
     synchronized (this)
     {
-      this.periodic.step(this.tiles);
+      //this.periodic.step(this.tiles);
       return this.tiles.step();
     }
   }
