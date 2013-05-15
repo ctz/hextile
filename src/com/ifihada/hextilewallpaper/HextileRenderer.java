@@ -16,7 +16,7 @@ public class HextileRenderer implements GLWallpaperService.Renderer
   private Tiles tiles = new Tiles();
   //private PeriodicManager periodic = new PeriodicManager();
   
-  static boolean DEBUG = true;
+  static boolean DEBUG = false;
   static int DEBUG_POINTS = 128;
   private FloatBuffer debugVertexBuffer;
   private int debugUsed;
